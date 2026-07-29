@@ -1,0 +1,52 @@
+# --- Général ---
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+
+# --- Backend (Python/Django) ---
+venv/
+__pycache__/
+*.pyc
+*.sqlite3
+staticfiles/
+media/
+
+# --- Backend (Node.js, si c'est ton cas) ---
+node_modules/
+dist/
+
+# --- Frontend (React/Vue/etc.) ---
+front/node_modules/
+front/dist/
+front/build/
+front/.env
+
+# --- Mobile (Flutter) ---
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/build/
+mobile/.metadata
+
+# Android (dans mobile/)
+mobile/android/.gradle
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/android/key.properties
+
+# iOS (dans mobile/)
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/App.framework
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Flutter/flutter_export_environment.sh
+mobile/ios/Runner/GeneratedPluginRegistrant.*

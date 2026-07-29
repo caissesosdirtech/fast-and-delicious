@@ -1,0 +1,21 @@
+.parametres-carte{
+  background:var(--panel); border:1.5px solid var(--line); border-radius:12px;
+  padding:16px; margin-bottom:16px; max-width:380px;
+}
+.parametres-label{
+  font-size:10.5px; font-weight:700; color:var(--ink-soft); letter-spacing:0.4px; margin-bottom:8px;
+}
+.parametres-username{ font-weight:700; font-size:15px; }
+.parametres-role{ color:var(--ink-soft); font-size:12.5px; }
+
+.parametres-form input{
+  width:100%; padding:10px 12px; margin-bottom:10px; border-radius:8px;
+  border:1.5px solid var(--line); font-size:13px; box-sizing:border-box;
+}
+.parametres-form button{
+  width:100%; padding:11px; border:none; border-radius:8px; background:var(--ink); color:#fff;
+  font-weight:700; cursor:pointer; font-size:13px;
+}
+.parametres-form button:disabled{ opacity:0.6; cursor:not-allowed; }
+.parametres-erreur{ color:var(--red-dim); font-size:12px; margin-bottom:10px; }
+.parametres-succes{ color:var(--green-dim); font-size:12px; font-weight:700; margin-bottom:10px; }

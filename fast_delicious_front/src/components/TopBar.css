@@ -1,0 +1,68 @@
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 22px;
+  background:var(--panel);
+  border-bottom:2px solid var(--ink);
+}
+.brand{
+  display:flex; align-items:center;
+  text-decoration:none;
+}
+.brand-logo{
+  height:42px; width:auto; border-radius:8px; display:block;
+}
+.topbar-right{ display:flex; align-items:center; gap:12px; }
+.topbar-role{ font-size:13px; color:var(--ink-soft); }
+.topbar-logout, .topbar-login{
+  background:none; border:2px solid var(--ink); color:var(--ink);
+  padding:7px 14px; border-radius:8px; font-weight:700; font-size:13px;
+  cursor:pointer; text-decoration:none;
+}
+
+.topbar-admin-link{
+  font-size:12.5px; font-weight:700; color:var(--red-dim);
+  text-decoration:none; padding:6px 10px; border-radius:8px;
+  transition:background .15s ease;
+}
+.topbar-admin-link:hover{ background:var(--cream-2); }
+
+.topbar-call-link{
+  display:flex; align-items:center; gap:5px;
+  background:var(--green); color:#fff; text-decoration:none;
+  padding:7px 12px; border-radius:20px; font-weight:700; font-size:12.5px;
+  transition:background .15s ease;
+}
+.topbar-call-link:hover{ background:var(--green-dim); }
+.topbar-call-number{ font-family:'IBM Plex Mono', monospace; }
+
+.cart-btn{
+  position:relative;
+  width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  border:1.5px solid var(--line); background:var(--panel); border-radius:10px;
+  font-size:16px; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+}
+.cart-btn:hover{ border-color:var(--gold); background:var(--cream-2); }
+.cart-btn-badge{
+  position:absolute; top:-6px; right:-6px;
+  background:var(--red); color:#fff; font-size:10.5px; font-weight:800;
+  min-width:18px; height:18px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center; padding:0 4px;
+  box-shadow:0 0 0 2px var(--cream);
+  animation:cart-bounce .3s ease;
+}
+@keyframes cart-bounce{
+  0%{ transform:scale(0.6); } 60%{ transform:scale(1.15); } 100%{ transform:scale(1); }
+}
+
+.topbar-vitrine-link{
+  font-size:12.5px; font-weight:700; color:var(--ink-soft);
+  text-decoration:none; padding:8px 12px; border-radius:8px;
+  border:1.5px solid var(--line);
+  transition:border-color .15s ease, color .15s ease;
+}
+.topbar-vitrine-link:hover{ border-color:var(--gold); color:var(--ink); }
+
+@media (max-width:480px){
+  .topbar-call-number{ display:none; }
+  .topbar-call-link{ padding:8px 10px; }
+}

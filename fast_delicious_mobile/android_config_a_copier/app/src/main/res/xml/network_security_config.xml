@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Autorise le trafic non chiffré (http:// et ws://) UNIQUEMENT en développement,
+  pour parler à ton backend Django local (10.0.2.2 ou ton IP locale).
+  ⚠️ Ne pas utiliser tel quel en production : une fois le backend déployé en HTTPS,
+  retire ce fichier (ou restreins-le) et utilise https:// / wss:// dans api_config.dart.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- Ajoute ici l'IP locale de ton PC si tu testes sur un téléphone physique, ex : -->
+        <!-- <domain includeSubdomains="true">192.168.1.10</domain> -->
+    </domain-config>
+</network-security-config>

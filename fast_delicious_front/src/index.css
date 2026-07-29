@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --cream:#FBF4E4;
+  --cream-2:#F3E9D2;
+  --ink:#2B241A;
+  --ink-soft:#7A7061;
+  --red:#D6402A;
+  --red-dim:#B23320;
+  --green:#3D8A4F;
+  --green-dim:#2E6B3D;
+  --gold:#E8A63B;
+  --panel:#FFFFFF;
+  --line:#E5D8BB;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:'Inter', sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+#root{ min-height:100vh; display:flex; flex-direction:column; }
+
+button{ font-family:inherit; }
+a{ color:inherit; }
+
+.font-display{ font-family:'Baloo 2', sans-serif; font-weight:800; }
+.font-mono{ font-family:'IBM Plex Mono', monospace; }
+
+.timer-box{
+  text-align:center; margin-top:18px; padding:14px;
+  background:var(--ink); border-radius:12px; color:var(--cream);
+}
+.timer-box .big{ font-size:32px; color:var(--gold); }
+.timer-box .lbl{ font-size:11px; color:#bdb5a4; letter-spacing:0.05em; text-transform:uppercase; }

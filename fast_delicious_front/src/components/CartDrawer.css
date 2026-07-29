@@ -1,0 +1,142 @@
+.cart-overlay{
+  position:fixed; inset:0; background:rgba(43,36,26,0.45);
+  display:flex; align-items:flex-end; justify-content:center;
+  z-index:50;
+}
+.cart-drawer{
+  width:100%; max-width:520px; max-height:80vh;
+  background:var(--panel); border-radius:20px 20px 0 0;
+  display:flex; flex-direction:column;
+  animation:slide-up .2s ease;
+}
+@keyframes slide-up{ from{ transform:translateY(24px); opacity:0.6; } to{ transform:none; opacity:1; } }
+
+.cart-drawer-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 20px; border-bottom:1px solid var(--line);
+}
+.cart-drawer-head h2{ font-size:18px; margin:0; }
+.cart-close{
+  width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+  border:none; background:var(--cream-2); border-radius:8px; cursor:pointer; color:var(--ink);
+  font-size:14px;
+}
+
+.cart-drawer-empty{ padding:40px 20px; text-align:center; color:var(--ink-soft); font-size:13.5px; }
+
+.cart-drawer-list{ overflow-y:auto; padding:8px 20px; flex:1; }
+.cart-drawer-item{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 0; border-bottom:1px dashed var(--line);
+}
+.cart-drawer-item:last-child{ border-bottom:none; }
+.cdi-name{ font-weight:700; font-size:13.5px; }
+.cdi-accompagnement{ font-size:11px; color:var(--green-dim); font-weight:600; margin-top:1px; }
+.cdi-selections{ font-size:10.5px; color:var(--green-dim); font-weight:600; margin-top:2px; line-height:1.4; }
+.cdi-price{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+.qty-stepper{
+  display:flex; align-items:center; gap:10px;
+  background:var(--cream-2); border-radius:8px; padding:4px 6px;
+}
+.qty-stepper button{
+  width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+  border:none; background:var(--panel); border-radius:6px; cursor:pointer;
+  color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,0.08); font-weight:700; font-size:14px; line-height:1;
+}
+.qty-stepper span{ min-width:16px; text-align:center; font-weight:700; font-size:13px; }
+
+.cart-drawer-erreur{
+  margin:0 20px 12px; padding:10px 12px; border-radius:8px;
+  background:#FBE4E0; color:var(--red-dim); font-size:12.5px; font-weight:600;
+}
+
+.cart-drawer-footer{ padding:16px 20px 22px; border-top:1px solid var(--line); }
+.cart-drawer-total{
+  display:flex; justify-content:space-between; font-size:14px; font-weight:700; margin-bottom:14px;
+}
+.cart-drawer-total span:last-child{ color:var(--gold); font-size:17px; }
+
+.order-btn{
+  width:100%; background:var(--red); color:#fff; border:none;
+  padding:13px; border-radius:10px; font-weight:800; cursor:pointer; font-size:14.5px;
+  box-shadow:0 8px 20px -6px rgba(214,64,42,0.45);
+  transition:background .15s ease, transform .1s ease;
+}
+.order-btn:hover:not(:disabled){ background:var(--red-dim); }
+.order-btn:active:not(:disabled){ transform:translateY(1px); }
+.order-btn:disabled{ opacity:0.55; cursor:not-allowed; box-shadow:none; }
+
+/* ---------- Sélection du mode de paiement ---------- */
+.paiement-section{ padding:0 20px; }
+.paiement-titre{
+  display:block; font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.04em; color:var(--ink-soft); margin-bottom:8px;
+}
+.paiement-toggle{ display:flex; gap:6px; margin-bottom:10px; }
+.paiement-toggle-4 button{ font-size:11px; padding:9px 4px; }
+.paiement-toggle button{
+  flex:1; padding:9px 6px; border-radius:9px;
+  border:1.5px solid var(--line); background:var(--panel);
+  font-size:12px; font-weight:700; color:var(--ink-soft);
+  cursor:pointer; transition:all .15s ease;
+}
+.paiement-toggle button.active{
+  background:var(--ink); border-color:var(--ink); color:var(--cream);
+}
+
+.pmm-conseil{
+  font-size:11px; font-weight:700; color:var(--green-dim);
+  background:rgba(61,138,79,0.12); padding:7px 10px; border-radius:8px;
+  margin-bottom:10px; text-align:center;
+}
+
+.pmm-qr{
+  display:block; width:100%; max-width:200px; margin:0 auto 10px;
+  border-radius:10px; border:1.5px solid var(--line);
+}
+
+.pmm-montant-a-payer{
+  text-align:center; font-size:13px; margin-bottom:8px;
+}
+.pmm-montant-a-payer strong{ color:var(--red-dim); font-size:15px; }
+
+.paiement-mobile-money{
+  background:var(--cream-2); border-radius:10px; padding:12px; margin-bottom:14px;
+}
+.pmm-numero-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.pmm-label{ font-size:11px; color:var(--ink-soft); margin-bottom:3px; }
+.pmm-numero{ font-size:17px; font-weight:800; color:var(--ink); }
+.pmm-beneficiaire{ font-size:10px; color:var(--ink-soft); margin-top:2px; }
+.pmm-copy{
+  flex-shrink:0; background:var(--panel); border:1.5px solid var(--line);
+  padding:8px 12px; border-radius:8px; font-size:11.5px; font-weight:700;
+  color:var(--ink); cursor:pointer;
+}
+.pmm-copy:hover{ border-color:var(--gold); }
+
+.pmm-reference-input{
+  width:100%; padding:9px 12px; border-radius:8px;
+  border:1.5px solid var(--line); font-size:13px; outline:none;
+  background:var(--panel);
+}
+.pmm-reference-input:focus{ border-color:var(--red); }
+
+.pmm-note{ font-size:10.5px; color:var(--ink-soft); margin-top:6px; }
+
+.pmm-ouvrir-app{
+  display:block; text-align:center; text-decoration:none;
+  background:#1DA1E8; color:#fff; font-weight:700; font-size:13px;
+  padding:12px; border-radius:10px; margin-bottom:10px; transition:opacity .15s ease;
+}
+.pmm-ouvrir-app:hover{ opacity:0.9; }
+.pmm-ouvrir-app-om{ background:#FF7900; }
+
+.pmm-ou{
+  text-align:center; font-size:10.5px; color:var(--ink-soft); margin-bottom:10px;
+}
+
+.pmm-note-scan{
+  font-size:10.5px; color:var(--ink-soft); background:var(--cream2);
+  border-radius:8px; padding:8px 10px; margin:8px 0; text-align:left; line-height:1.4;
+}

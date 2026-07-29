@@ -1,0 +1,49 @@
+.ticket-modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex;
+  align-items:center; justify-content:center; z-index:100; padding:20px;
+}
+.ticket-modal{
+  background:#fff; border-radius:14px; padding:24px; width:100%; max-width:380px;
+  position:relative; max-height:90vh; overflow-y:auto;
+}
+.ticket-modal-fermer{
+  position:absolute; top:12px; right:12px; background:none; border:none; font-size:16px;
+  cursor:pointer; color:var(--ink-soft); width:28px; height:28px; border-radius:50%;
+}
+.ticket-modal-fermer:hover{ background:var(--cream2); }
+
+.ticket-modal-titre{ margin:0 0 6px; font-size:18px; }
+.ticket-modal-sub{ font-size:12px; color:var(--ink-soft); margin-bottom:3px; }
+
+.ticket-modal-lignes{ margin:14px 0; border-top:1px dashed var(--line); padding-top:10px; }
+.ticket-modal-ligne{ display:flex; justify-content:space-between; font-size:12.5px; padding:3px 0; }
+.ticket-modal-ligne span:last-child{ color:var(--ink-soft); }
+
+.ticket-modal-remarque{ font-size:11.5px; font-style:italic; color:var(--ink-soft); margin-bottom:6px; }
+.ticket-modal-paiement{ font-size:11.5px; color:var(--red-dim); font-weight:600; margin-bottom:6px; }
+.ticket-modal-motif{ font-size:11.5px; color:var(--red-dim); font-style:italic; margin-bottom:6px; }
+
+.ticket-modal-divider{ border-top:1px dashed var(--line); margin:10px 0; }
+.ticket-modal-total{ display:flex; justify-content:space-between; font-weight:800; font-size:14px; }
+
+.ticket-modal-statut{
+  margin-top:14px; text-align:center; padding:9px; border-radius:8px; font-weight:700; font-size:12.5px;
+}
+.ticket-modal-statut.statut-servie{ background:rgba(61,138,79,0.14); color:var(--green-dim); }
+.ticket-modal-statut.statut-annulee{ background:rgba(214,64,42,0.12); color:var(--red-dim); }
+.ticket-modal-statut:not(.statut-servie):not(.statut-annulee){ background:rgba(232,166,59,0.14); color:#93691F; }
+
+.ticket-modal-imprimer{
+  width:100%; margin-top:16px; padding:11px; border:none; border-radius:9px;
+  background:var(--ink); color:#fff; font-weight:700; cursor:pointer; font-size:13px;
+}
+.ticket-modal-imprimer:hover{ background:#3a3327; }
+
+@media print {
+  .ticket-modal-fermer, .ticket-modal-imprimer{ display:none !important; }
+  body *{ visibility:hidden; }
+  #ticket-a-imprimer, #ticket-a-imprimer *{ visibility:visible; }
+  #ticket-a-imprimer{ position:absolute; top:0; left:0; width:100%; margin:0; }
+  .ticket-modal-overlay{ position:static !important; background:none !important; padding:0 !important; }
+  .ticket-modal{ box-shadow:none; max-height:none; max-width:100%; position:static; overflow:visible; }
+}

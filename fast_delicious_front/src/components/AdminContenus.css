@@ -1,0 +1,84 @@
+.admin-contenu-header{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;
+}
+.admin-contenu-header h3{ margin:0; font-size:16px; font-weight:700; }
+
+.admin-btn-ajouter{
+  padding:9px 16px; border:none; border-radius:8px; background:var(--ink); color:#fff;
+  font-weight:700; font-size:12.5px; cursor:pointer;
+}
+.admin-btn-ajouter:hover{ background:#3a3327; }
+
+.admin-liste-item{
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--panel); border:1.5px solid var(--line); border-radius:10px;
+  padding:14px; margin-bottom:8px;
+}
+.admin-liste-titre{ font-weight:700; font-size:14px; }
+.admin-liste-sous{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+.admin-liste-actions{ display:flex; gap:6px; }
+.admin-liste-actions button{
+  background:var(--cream2); border:none; border-radius:6px; padding:6px 9px; cursor:pointer; font-size:13px;
+}
+.admin-liste-actions button:hover{ background:var(--line); }
+
+.admin-tags-wrap{ display:flex; flex-wrap:wrap; gap:10px; }
+.admin-tag{
+  display:flex; align-items:center; gap:8px; background:var(--panel); border:1.5px solid var(--line);
+  border-radius:10px; padding:9px 14px; font-weight:600; font-size:13px;
+}
+.admin-tag button{ background:none; border:none; color:var(--red-dim); cursor:pointer; font-size:13px; }
+
+.admin-table-wrap{
+  background:var(--panel); border:1.5px solid var(--line); border-radius:12px; overflow-x:auto;
+}
+.admin-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+.admin-table th{
+  text-align:left; padding:10px 14px; font-size:10.5px; text-transform:uppercase;
+  color:var(--ink-soft); letter-spacing:0.3px; border-bottom:1.5px solid var(--line);
+}
+.admin-table td{ padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:middle; }
+.admin-table tr:last-child td{ border-bottom:none; }
+.admin-table button{
+  background:var(--cream2); border:none; border-radius:6px; padding:5px 9px; cursor:pointer; font-size:12px; margin-right:4px;
+}
+.admin-table button:hover{ background:var(--line); }
+
+.admin-badge-actif{ background:rgba(61,138,79,0.14); color:var(--green-dim); padding:3px 9px; border-radius:8px; font-size:10.5px; font-weight:700; }
+.admin-badge-inactif{ background:rgba(122,112,97,0.14); color:var(--ink-soft); padding:3px 9px; border-radius:8px; font-size:10.5px; font-weight:700; }
+
+.chargement-texte{ color:var(--ink-soft); font-size:13px; }
+
+/* Modal de formulaire (Employés, Produits, etc.) */
+.admin-modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex;
+  align-items:center; justify-content:center; z-index:100; padding:20px;
+}
+.admin-modal{
+  background:#fff; border-radius:14px; padding:24px; width:100%; max-width:400px;
+  max-height:90vh; overflow-y:auto;
+}
+.admin-modal h3{ margin:0 0 16px; font-size:17px; }
+.admin-modal label{
+  display:block; font-size:11px; font-weight:700; color:var(--ink-soft);
+  letter-spacing:0.3px; margin-bottom:5px; margin-top:12px;
+}
+.admin-modal label:first-of-type{ margin-top:0; }
+.admin-modal input[type="text"], .admin-modal input[type="password"], .admin-modal input, .admin-modal select{
+  width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid var(--line);
+  font-size:13px; box-sizing:border-box; background:var(--panel);
+}
+.admin-modal-checkbox{
+  display:flex !important; align-items:center; gap:8px; font-size:13px !important;
+  font-weight:600 !important; color:var(--ink) !important; text-transform:none !important;
+  letter-spacing:normal !important; margin-top:14px !important; cursor:pointer;
+}
+.admin-modal-checkbox input{ width:auto !important; }
+.admin-modal-erreur{ color:var(--red-dim); font-size:12px; margin-top:12px; word-break:break-word; }
+.admin-modal-actions{ display:flex; gap:10px; margin-top:20px; }
+.admin-modal-annuler, .admin-modal-valider{
+  flex:1; padding:11px; border:none; border-radius:9px; font-weight:700; font-size:13px; cursor:pointer;
+}
+.admin-modal-annuler{ background:var(--cream2); color:var(--ink); }
+.admin-modal-valider{ background:var(--ink); color:#fff; }
+.admin-modal-valider:disabled{ opacity:0.6; cursor:not-allowed; }

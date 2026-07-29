@@ -1,0 +1,13 @@
+.stepper{ display:flex; align-items:center; margin:20px 0 6px; }
+.step{ flex:1; text-align:center; position:relative; }
+.step .dot{
+  width:14px; height:14px; border-radius:50%; margin:0 auto 6px;
+  background:var(--line); border:2px solid var(--line);
+}
+.step.done .dot{ background:var(--red); border-color:var(--red); }
+.step.current .dot{ background:var(--gold); border-color:var(--gold); box-shadow:0 0 0 4px rgba(232,166,59,0.25); }
+.step label{ font-size:9px; color:var(--ink-soft); letter-spacing:0.02em; }
+.step:not(:last-child)::after{
+  content:""; position:absolute; top:6px; left:56%; width:88%; height:2px; background:var(--line);
+}
+.step.done:not(:last-child)::after{ background:var(--red); }

@@ -1,0 +1,73 @@
+.client-suivi{ max-width:500px; margin:0 auto; padding:0 18px 60px; }
+
+.suivi-etat{
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  text-align:center; padding:100px 20px; color:var(--ink-soft);
+}
+
+.ticket-wrap{ display:flex; justify-content:center; margin-top:8px; }
+.ticket{
+  width:100%; max-width:340px; background:#fff; color:var(--ink);
+  padding:24px 22px 28px; position:relative;
+  box-shadow:0 16px 38px -10px rgba(43,36,26,0.28);
+  border:1.5px solid var(--line);
+  clip-path: polygon(
+    0% 0%,100% 0%,100% 96%,
+    95% 100%,90% 96%,85% 100%,80% 96%,75% 100%,70% 96%,65% 100%,
+    60% 96%,55% 100%,50% 96%,45% 100%,40% 96%,35% 100%,30% 96%,
+    25% 100%,20% 96%,15% 100%,10% 96%,5% 100%,0% 96%
+  );
+}
+
+.ticket-head{ text-align:center; margin-bottom:16px; }
+.ticket h2{ font-size:20px; margin:0; color:var(--red); }
+.ticket .sub{ font-size:11px; color:var(--ink-soft); margin-top:4px; }
+
+.ticket-lines{ display:flex; flex-direction:column; gap:6px; }
+.ticket-line{ display:flex; justify-content:space-between; font-size:13px; gap:10px; }
+.ticket-line span:first-child{ text-align:left; }
+.ticket-line span:last-child{ flex-shrink:0; color:var(--ink-soft); }
+
+.divider{ border-top:1px dashed var(--line); margin:14px 0; }
+
+.ticket-rappel-table{
+  margin-top:8px; padding:7px 10px; border-radius:8px;
+  background:rgba(232,166,59,0.14); color:#93691f;
+  font-size:10.5px; line-height:1.4; text-align:left;
+}
+.ticket-total{ font-weight:800 !important; font-size:14px !important; }
+.ticket-total span:last-child{ color:var(--ink) !important; }
+
+.stamp{
+  display:block; text-align:center; margin-top:18px;
+  border-radius:10px; padding:10px 14px; font-size:13px; letter-spacing:0.01em;
+}
+.stamp-gold{ background:rgba(232,166,59,0.14); color:#93691f; }
+.stamp-green{ background:rgba(61,138,79,0.12); color:var(--green-dim); }
+.stamp-red{ background:rgba(214,64,42,0.10); color:var(--red-dim); }
+
+.annulation-wrap{ text-align:center; margin-top:16px; }
+.annulation-btn{
+  background:none; border:1.5px solid var(--line); color:var(--ink-soft);
+  padding:9px 18px; border-radius:20px; font-size:12.5px; font-weight:600;
+  cursor:pointer; transition:border-color .15s ease, color .15s ease;
+}
+.annulation-btn:hover:not(:disabled){ border-color:var(--red); color:var(--red-dim); }
+.annulation-btn:disabled{ opacity:0.6; cursor:not-allowed; }
+
+.imprimer-wrap{ text-align:center; margin-top:14px; }
+.imprimer-btn{
+  background:var(--ink); color:var(--cream); border:none;
+  padding:10px 20px; border-radius:20px; font-size:12.5px; font-weight:700;
+  cursor:pointer; transition:background .15s ease;
+}
+.imprimer-btn:hover{ background:#3a3327; }
+
+/* À l'impression : uniquement le ticket, rien d'autre (nav, boutons, badges "en direct"...) */
+@media print {
+  .no-print{ display:none !important; }
+  body *{ visibility:hidden; }
+  .ticket-wrap, .ticket-wrap *{ visibility:visible; }
+  .ticket-wrap{ position:absolute; top:0; left:0; width:100%; margin:0; }
+  .ticket{ box-shadow:none; border:1px solid #000; }
+}
