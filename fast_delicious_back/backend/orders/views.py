@@ -11,6 +11,16 @@ from .models import Commande, LigneCommande
 from .permissions import EstAdmin, EstCaissiere, EstCuisinier
 from .serializers import CommandeCreationSerializer, CommandeSerializer
 
+from datetime import datetime
+
+from datetime import timedelta
+
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from django.utils import timezone
+
+from rest_framework.response import Response
+
 
 class CommandeCreationView(generics.CreateAPIView):
     """POST /api/commandes/ — le client crée sa commande depuis le menu."""
@@ -145,41 +155,322 @@ class MarquerServieView(APIView):
 
 
 class StatistiquesAdminView(APIView):
-    """GET /api/admin/statistiques/ — vue d'ensemble du jour pour le tableau de bord admin."""
+    """
+    GET /api/admin/statistiques/
+
+    Paramètres :
+    - date=YYYY-MM-DD : date à consulter
+    - lieu=<id>       : filtrer par lieu (optionnel)
+    """
 
     permission_classes = [EstAdmin]
 
     def get(self, request):
-        aujourdhui = timezone.now().date()
-        commandes_jour = Commande.objects.filter(date_creation__date=aujourdhui)
-        commandes_valides = commandes_jour.exclude(statut=Commande.Statut.ANNULEE).prefetch_related("lignes__plat")
+        # ============================================================
+        # 1. DATE DEMANDÉE
+        # ============================================================
+        date_str = request.query_params.get("date")
 
-        chiffre_affaires = sum((c.total for c in commandes_valides), 0)
+        if date_str:
+            try:
+                date_selectionnee = datetime.strptime(
+                    date_str, "%Y-%m-%d"
+                ).date()
+            except ValueError:
+                return Response(
+                    {
+                        "detail": "Format de date invalide. Utilisez YYYY-MM-DD."
+                    },
+                    status=400,
+                )
+        else:
+            date_selectionnee = timezone.localdate()
+
+        # ============================================================
+        # 2. COMMANDES DE LA DATE SÉLECTIONNÉE
+        # ============================================================
+        commandes_jour = Commande.objects.filter(
+            date_creation__date=date_selectionnee
+        )
+
+        # ============================================================
+        # 3. FILTRE PAR LIEU
+        # ============================================================
+        lieu_id = request.query_params.get("lieu")
+
+        if lieu_id:
+            commandes_jour = commandes_jour.filter(
+                lieu_id=lieu_id
+            )
+
+        # ============================================================
+        # 4. COMMANDES VALIDES
+        # ============================================================
+        commandes_valides = (
+            commandes_jour
+            .exclude(statut=Commande.Statut.ANNULEE)
+            .prefetch_related("lignes__plat")
+        )
+
+        # ============================================================
+        # 5. CHIFFRE D'AFFAIRES
+        # ============================================================
+        chiffre_affaires = sum(
+            (c.total for c in commandes_valides),
+            0
+        )
+
         nb_valides = commandes_valides.count()
 
+        # ============================================================
+        # 6. COMMANDES PAR STATUT
+        # ============================================================
         par_statut = {
-            statut: commandes_jour.filter(statut=statut).count()
+            statut: commandes_jour.filter(
+                statut=statut
+            ).count()
             for statut, _ in Commande.Statut.choices
         }
 
-        lignes_jour = LigneCommande.objects.filter(
-            commande__in=commandes_valides
-        ).select_related("plat")
+        # ============================================================
+        # 7. PLATS LES PLUS VENDUS
+        # ============================================================
+        lignes_jour = (
+            LigneCommande.objects
+            .filter(commande__in=commandes_valides)
+            .select_related("plat")
+        )
 
         ventes_par_plat = {}
+
         for ligne in lignes_jour:
             cle = ligne.plat.nom
-            ventes_par_plat[cle] = ventes_par_plat.get(cle, 0) + ligne.quantite
-        top_plats = sorted(ventes_par_plat.items(), key=lambda item: -item[1])[:6]
 
-        commandes_recentes = commandes_jour.order_by("-date_creation").prefetch_related("lignes__plat")[:15]
+            ventes_par_plat[cle] = (
+                ventes_par_plat.get(cle, 0)
+                + ligne.quantite
+            )
+
+        top_plats = sorted(
+            ventes_par_plat.items(),
+            key=lambda item: -item[1]
+        )[:6]
+
+        # ============================================================
+        # 8. COMMANDES RÉCENTES DE LA DATE
+        # ============================================================
+        commandes_recentes = (
+            commandes_jour
+            .order_by("-date_creation")
+            .prefetch_related("lignes__plat")[:15]
+        )
+
+        # ============================================================
+        # 9. RÉPONSE
+        # ============================================================
+        return Response({
+            "date": date_selectionnee.isoformat(),
+
+            "est_aujourdhui": (
+                date_selectionnee == timezone.localdate()
+            ),
+
+            "nombre_commandes": commandes_jour.count(),
+
+            "chiffre_affaires": chiffre_affaires,
+
+            "panier_moyen": (
+                round(chiffre_affaires / nb_valides, 0)
+                if nb_valides
+                else 0
+            ),
+
+            "commandes_par_statut": par_statut,
+
+            "top_plats": [
+                {
+                    "nom": nom,
+                    "quantite": q
+                }
+                for nom, q in top_plats
+            ],
+
+            "commandes_recentes": (
+                CommandeSerializer(
+                    commandes_recentes,
+                    many=True
+                ).data
+            ),
+        })
+
+class EtatCaisseView(APIView):
+    """
+    GET /api/admin/caisse/?periode=jour
+    GET /api/admin/caisse/?periode=semaine
+    GET /api/admin/caisse/?periode=mois
+    GET /api/admin/caisse/?periode=annee
+    """
+
+    permission_classes = [EstAdmin]
+
+    def get(self, request):
+        periode = request.query_params.get("periode", "jour")
+
+        aujourd_hui = timezone.localdate()
+
+        # ============================================================
+        # DÉTERMINATION DE LA PÉRIODE
+        # ============================================================
+
+        if periode == "jour":
+
+            date_debut = aujourd_hui
+            date_fin = aujourd_hui
+
+            libelle_periode = (
+                f"Ventes du {aujourd_hui.strftime('%d/%m/%Y')}"
+            )
+
+        elif periode == "semaine":
+
+            date_debut = (
+                aujourd_hui
+                - timedelta(days=aujourd_hui.weekday())
+            )
+
+            date_fin = aujourd_hui
+
+            libelle_periode = (
+                f"Du {date_debut.strftime('%d/%m/%Y')} "
+                f"au {date_fin.strftime('%d/%m/%Y')}"
+            )
+
+        elif periode == "mois":
+
+            date_debut = aujourd_hui.replace(day=1)
+            date_fin = aujourd_hui
+
+            libelle_periode = (
+                aujourd_hui.strftime("%B %Y").capitalize()
+            )
+
+        elif periode == "annee":
+
+            date_debut = aujourd_hui.replace(
+                month=1,
+                day=1
+            )
+
+            date_fin = aujourd_hui
+
+            libelle_periode = f"Année {aujourd_hui.year}"
+
+        else:
+            return Response(
+                {
+                    "detail": (
+                        "Période invalide. "
+                        "Utilisez jour, semaine, mois ou annee."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # ============================================================
+        # COMMANDES DE LA PÉRIODE
+        # ============================================================
+
+        commandes = (
+            Commande.objects
+            .filter(
+                date_creation__date__gte=date_debut,
+                date_creation__date__lte=date_fin
+            )
+            .exclude(
+                statut=Commande.Statut.ANNULEE
+            )
+            .prefetch_related("lignes__plat")
+            .order_by("-date_creation")
+        )
+
+        # ============================================================
+        # CHIFFRE D'AFFAIRES
+        # ============================================================
+
+        chiffre_affaires = sum(
+            (commande.total for commande in commandes),
+            0
+        )
+
+        nombre_commandes = commandes.count()
+
+        panier_moyen = (
+            round(
+                chiffre_affaires / nombre_commandes,
+                0
+            )
+            if nombre_commandes
+            else 0
+        )
+
+        # ============================================================
+        # ÉVOLUTION JOUR PAR JOUR
+        # ============================================================
+
+        evolution = []
+
+        date_courante = date_debut
+
+        while date_courante <= date_fin:
+
+            commandes_date = [
+                commande
+                for commande in commandes
+                if timezone.localtime(
+                    commande.date_creation
+                ).date() == date_courante
+            ]
+
+            total_date = sum(
+                (commande.total for commande in commandes_date),
+                0
+            )
+
+            evolution.append({
+                "date": date_courante.isoformat(),
+
+                "label": date_courante.strftime("%d/%m"),
+
+                "total": total_date,
+
+                "commandes": len(commandes_date),
+            })
+
+            date_courante += timedelta(days=1)
+
+        # ============================================================
+        # RÉPONSE
+        # ============================================================
 
         return Response({
-            "date": aujourdhui.isoformat(),
-            "nombre_commandes": commandes_jour.count(),
+            "periode": periode,
+
+            "date_debut": date_debut.isoformat(),
+
+            "date_fin": date_fin.isoformat(),
+
+            "libelle_periode": libelle_periode,
+
             "chiffre_affaires": chiffre_affaires,
-            "panier_moyen": round(chiffre_affaires / nb_valides, 0) if nb_valides else 0,
-            "commandes_par_statut": par_statut,
-            "top_plats": [{"nom": nom, "quantite": q} for nom, q in top_plats],
-            "commandes_recentes": CommandeSerializer(commandes_recentes, many=True).data,
+
+            "nombre_commandes": nombre_commandes,
+
+            "panier_moyen": panier_moyen,
+
+            "evolution": evolution,
+
+            "commandes": CommandeSerializer(
+                commandes[:30],
+                many=True
+            ).data,
         })

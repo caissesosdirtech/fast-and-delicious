@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from datetime import timedelta
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
@@ -413,3 +414,175 @@ class StatistiquesAdminView(APIView):
             "commandes_recentes": CommandeSerializer(commandes_recentes, many=True).data,
             "ventes_7_jours": ventes_7_jours,
         })
+
+class EtatCaisseView(APIView):
+    """
+    GET /api/admin/caisse/?periode=jour
+    GET /api/admin/caisse/?periode=semaine
+    GET /api/admin/caisse/?periode=mois
+    GET /api/admin/caisse/?periode=annee
+    """
+
+    permission_classes = [EstAdmin]
+
+    def get(self, request):
+        periode = request.query_params.get("periode", "jour")
+
+        aujourd_hui = timezone.localdate()
+
+        # ============================================================
+        # DÉTERMINATION DE LA PÉRIODE
+        # ============================================================
+
+        if periode == "jour":
+
+            date_debut = aujourd_hui
+            date_fin = aujourd_hui
+
+            libelle_periode = (
+                f"Ventes du {aujourd_hui.strftime('%d/%m/%Y')}"
+            )
+
+        elif periode == "semaine":
+
+            date_debut = (
+                aujourd_hui
+                - timedelta(days=aujourd_hui.weekday())
+            )
+
+            date_fin = aujourd_hui
+
+            libelle_periode = (
+                f"Du {date_debut.strftime('%d/%m/%Y')} "
+                f"au {date_fin.strftime('%d/%m/%Y')}"
+            )
+
+        elif periode == "mois":
+
+            date_debut = aujourd_hui.replace(day=1)
+            date_fin = aujourd_hui
+
+            libelle_periode = (
+                aujourd_hui.strftime("%B %Y").capitalize()
+            )
+
+        elif periode == "annee":
+
+            date_debut = aujourd_hui.replace(
+                month=1,
+                day=1
+            )
+
+            date_fin = aujourd_hui
+
+            libelle_periode = f"Année {aujourd_hui.year}"
+
+        else:
+            return Response(
+                {
+                    "detail": (
+                        "Période invalide. "
+                        "Utilisez jour, semaine, mois ou annee."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # ============================================================
+        # COMMANDES DE LA PÉRIODE
+        # ============================================================
+
+        commandes = (
+            Commande.objects
+            .filter(
+                date_creation__date__gte=date_debut,
+                date_creation__date__lte=date_fin
+            )
+            .exclude(
+                statut=Commande.Statut.ANNULEE
+            )
+            .prefetch_related("lignes__plat")
+            .order_by("-date_creation")
+        )
+
+        # ============================================================
+        # CHIFFRE D'AFFAIRES
+        # ============================================================
+
+        chiffre_affaires = sum(
+            (commande.total for commande in commandes),
+            0
+        )
+
+        nombre_commandes = commandes.count()
+
+        panier_moyen = (
+            round(
+                chiffre_affaires / nombre_commandes,
+                0
+            )
+            if nombre_commandes
+            else 0
+        )
+
+        # ============================================================
+        # ÉVOLUTION JOUR PAR JOUR
+        # ============================================================
+
+        evolution = []
+
+        date_courante = date_debut
+
+        while date_courante <= date_fin:
+
+            commandes_date = [
+                commande
+                for commande in commandes
+                if timezone.localtime(
+                    commande.date_creation
+                ).date() == date_courante
+            ]
+
+            total_date = sum(
+                (commande.total for commande in commandes_date),
+                0
+            )
+
+            evolution.append({
+                "date": date_courante.isoformat(),
+
+                "label": date_courante.strftime("%d/%m"),
+
+                "total": total_date,
+
+                "commandes": len(commandes_date),
+            })
+
+            date_courante += timedelta(days=1)
+
+        # ============================================================
+        # RÉPONSE
+        # ============================================================
+
+        return Response({
+            "periode": periode,
+
+            "date_debut": date_debut.isoformat(),
+
+            "date_fin": date_fin.isoformat(),
+
+            "libelle_periode": libelle_periode,
+
+            "chiffre_affaires": chiffre_affaires,
+
+            "nombre_commandes": nombre_commandes,
+
+            "panier_moyen": panier_moyen,
+
+            "evolution": evolution,
+
+            "commandes": CommandeSerializer(
+                commandes[:30],
+                many=True
+            ).data,
+        })    

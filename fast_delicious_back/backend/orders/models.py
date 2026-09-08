@@ -5,6 +5,7 @@ from django.utils import timezone
 from menu.models import Plat
 
 
+```python
 class Commande(models.Model):
     class Statut(models.TextChoices):
         EN_ATTENTE = "EN_ATTENTE", "En attente"
@@ -14,12 +15,34 @@ class Commande(models.Model):
         SERVIE = "SERVIE", "Servie"
         ANNULEE = "ANNULEE", "Annulée"
 
+
     client = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="commandes",
-        on_delete=models.SET_NULL, null=True, blank=True,
+        settings.AUTH_USER_MODEL,
+        related_name="commandes",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
-    numero_table = models.CharField(max_length=10, blank=True)
-    statut = models.CharField(max_length=20, choices=Statut.choices, default=Statut.EN_ATTENTE)
+
+    # Lieu où la commande a été passée
+    lieu = models.ForeignKey(
+        "menu.Lieu",
+        related_name="commandes",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    numero_table = models.CharField(
+        max_length=10,
+        blank=True,
+    )
+
+    statut = models.CharField(
+        max_length=20,
+        choices=Statut.choices,
+        default=Statut.EN_ATTENTE,
+    )
 
     date_creation = models.DateTimeField(auto_now_add=True)
     date_validation = models.DateTimeField(null=True, blank=True)
@@ -28,12 +51,19 @@ class Commande(models.Model):
     date_servie = models.DateTimeField(null=True, blank=True)
 
     caissiere = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="commandes_encaissees",
-        on_delete=models.SET_NULL, null=True, blank=True,
+        settings.AUTH_USER_MODEL,
+        related_name="commandes_encaissees",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
+
     cuisinier = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="commandes_preparees",
-        on_delete=models.SET_NULL, null=True, blank=True,
+        settings.AUTH_USER_MODEL,
+        related_name="commandes_preparees",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -44,27 +74,58 @@ class Commande(models.Model):
 
     @property
     def total(self):
-        return sum(ligne.sous_total for ligne in self.lignes.all())
+        return sum(
+            ligne.sous_total
+            for ligne in self.lignes.all()
+        )
 
     @property
     def temps_total_estime_min(self):
-        """Temps de préparation théorique total (somme des plats), sans tenir compte de la charge cuisine."""
-        return sum(l.plat.temps_preparation_min * l.quantite for l in self.lignes.all())
+        """
+        Temps de préparation théorique total
+        (somme des plats), sans tenir compte
+        de la charge cuisine.
+        """
+        return sum(
+            l.plat.temps_preparation_min * l.quantite
+            for l in self.lignes.all()
+        )
 
     @property
     def temps_restant_estime_min(self):
-        """Temps restant estimé à partir du début de préparation.
-        Si la préparation n'a pas commencé, renvoie le temps total théorique.
         """
-        if self.statut in [self.Statut.PRETE, self.Statut.SERVIE, self.Statut.ANNULEE]:
+        Temps restant estimé à partir du début
+        de préparation.
+
+        Si la préparation n'a pas commencé,
+        renvoie le temps total théorique.
+        """
+        if self.statut in [
+            self.Statut.PRETE,
+            self.Statut.SERVIE,
+            self.Statut.ANNULEE,
+        ]:
             return 0
+
         if not self.date_debut_preparation:
             return self.temps_total_estime_min
-        ecoule_min = (timezone.now() - self.date_debut_preparation).total_seconds() / 60
-        return max(0, round(self.temps_total_estime_min - ecoule_min))
+
+        ecoule_min = (
+            timezone.now() - self.date_debut_preparation
+        ).total_seconds() / 60
+
+        return max(
+            0,
+            round(
+                self.temps_total_estime_min - ecoule_min
+            )
+        )
 
     def enregistrer_historique(self):
-        HistoriqueStatut.objects.create(commande=self, statut=self.statut)
+        HistoriqueStatut.objects.create(
+            commande=self,
+            statut=self.statut,
+        )
 
 
 class LigneCommande(models.Model):

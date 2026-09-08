@@ -2,6 +2,8 @@ from django.urls import path
 
 from . import views
 
+from .views import (StatistiquesAdminView, EtatCaisseView,)
+
 urlpatterns = [
     # Client
     path("commandes/", views.CommandeCreationView.as_view(), name="commande-creation"),
@@ -19,4 +21,5 @@ urlpatterns = [
 
     # Admin
     path("admin/statistiques/", views.StatistiquesAdminView.as_view(), name="admin-statistiques"),
+    path("admin/caisse/",EtatCaisseView.as_view(), name="etat-caisse"),
 ]
