@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { CODE_MARCHAND_ORANGE_MONEY, LIEN_PAIEMENT_PAR_MODE, NOM_BENEFICIAIRE, QR_PAR_MODE } from "../config/paiement";
+import { CODE_MARCHAND_ORANGE_MONEY, LIEN_PAIEMENT_PAR_MODE, QR_PAR_MODE } from "../config/paiement";
 import "./CartDrawer.css";
 
 export default function CartDrawer() {
@@ -145,7 +145,6 @@ export default function CartDrawer() {
                 <div className="pmm-montant-a-payer">
                   Montant à envoyer : <strong>{totalPrix.toLocaleString("fr-FR")} FCFA</strong>
                 </div>
-                <div className="pmm-beneficiaire">{NOM_BENEFICIAIRE}</div>
                 <input
                   className="pmm-reference-input"
                   placeholder="Référence de la transaction *"

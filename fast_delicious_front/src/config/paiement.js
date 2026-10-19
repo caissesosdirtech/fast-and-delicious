@@ -3,7 +3,6 @@
  * Les images QR sont dans /public (qr-pimix-yas.jpeg, qr-wave.jpg, qr-orange-money.jpg).
  */
 export const CODE_MARCHAND_ORANGE_MONEY = "603097";
-export const NOM_BENEFICIAIRE = "Fast & Delicious";
 
 export const QR_PAR_MODE = {
   PI_MIX: "/qr-pimix-yas.jpeg",
