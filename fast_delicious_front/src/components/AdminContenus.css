@@ -82,3 +82,66 @@
 .admin-modal-annuler{ background:var(--cream2); color:var(--ink); }
 .admin-modal-valider{ background:var(--ink); color:#fff; }
 .admin-modal-valider:disabled{ opacity:0.6; cursor:not-allowed; }
+
+.caisse-periodes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.caisse-periode-btn,
+.caisse-periode-active {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.caisse-periode-active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.caisse-evolution {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.caisse-evolution-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 150px;
+  gap: 15px;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.caisse-date {
+  font-weight: 600;
+}
+
+.caisse-evolution-montant {
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.caisse-commandes {
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .caisse-evolution-row {
+    grid-template-columns: 80px 1fr;
+  }
+
+  .caisse-commandes {
+    grid-column: 2;
+    text-align: left;
+  }
+}

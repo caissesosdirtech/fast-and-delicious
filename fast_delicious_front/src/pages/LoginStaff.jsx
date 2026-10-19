@@ -69,7 +69,7 @@ export default function LoginStaff() {
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="ex. caissiere1"
+              placeholder="ex. admin"
               required
             />
           </div>
