@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import client from "../api/client";
 import { useRevelation } from "../hooks/useRevelation";
+import { photoLocalePlat } from "../data/photosPlats";
 import "./MenuVitrine.css";
 
 const ICONES_CATEGORIE = {
@@ -53,8 +54,8 @@ function PlatVitrine({ plat, catIcon, delai }) {
       style={{ transitionDelay: `${delai}s` }}
     >
       <div className="vitrine-card-img">
-        {plat.image ? (
-          <img src={plat.image} alt={plat.nom} loading="lazy" />
+        {plat.image || photoLocalePlat(plat.nom) ? (
+          <img src={plat.image || photoLocalePlat(plat.nom)} alt={plat.nom} loading="lazy" />
         ) : (
           <span aria-hidden="true">{catIcon}</span>
         )}

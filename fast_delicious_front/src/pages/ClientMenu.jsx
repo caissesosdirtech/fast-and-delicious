@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import client from "../api/client";
 import { useCart } from "../context/CartContext";
+import { photoLocalePlat } from "../data/photosPlats";
 import "./ClientMenu.css";
 
 const ICONES_CATEGORIE = {
@@ -294,8 +295,8 @@ export default function ClientMenu() {
                   <div className="formule-vitrine-ruban" aria-hidden="true">FORMULE</div>
 
                   <div className="formule-vitrine-media">
-                    {plat.image ? (
-                      <img src={plat.image} alt={plat.nom} loading="lazy" />
+                    {plat.image || photoLocalePlat(plat.nom) ? (
+                      <img src={plat.image || photoLocalePlat(plat.nom)} alt={plat.nom} loading="lazy" />
                     ) : (
                       <span aria-hidden="true">🍱</span>
                     )}
@@ -401,8 +402,8 @@ export default function ClientMenu() {
                   return (
                     <div className={`plat-card${quantite > 0 ? " in-cart" : ""}`} key={plat.id}>
                       <div className="plat-thumb">
-                        {plat.image ? (
-                          <img src={plat.image} alt={plat.nom} loading="lazy" />
+                        {plat.image || photoLocalePlat(plat.nom) ? (
+                          <img src={plat.image || photoLocalePlat(plat.nom)} alt={plat.nom} loading="lazy" />
                         ) : (
                           <span className="plat-thumb-fallback" aria-hidden="true">
                             {iconePourCategorie(cat.nom)}
