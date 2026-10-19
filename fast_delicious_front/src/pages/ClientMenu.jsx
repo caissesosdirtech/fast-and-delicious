@@ -186,22 +186,7 @@ export default function ClientMenu() {
         <BandeauDefilant texte="🍽️ PAIEMENT ESPÈCES / WAVE / ORANGE MONEY — LIVRAISON DISPONIBLE — RETRAIT SUR PLACE 🍽️" />
 
         <div className="menu-banner-content">
-          <div className="eyebrow-badge">
-            <span className="eyebrow-flag" aria-hidden="true">🍔</span>
-            <span className="eyebrow-text">Fast &amp; Delicious</span>
-            <span className="eyebrow-flag eyebrow-flag-right" aria-hidden="true">🔥</span>
-          </div>
-
-          <h1 className="menu-hero-title font-display">
-            <span className="menu-hero-fast">Fast</span>
-            <span className="menu-hero-amp">&amp;</span>
-            <span className="menu-hero-delicious">
-              Delicious
-              <svg className="menu-hero-underline" viewBox="0 0 320 18" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M4 12 C 60 2, 120 18, 160 9 S 260 2, 316 10" fill="none" stroke="var(--gold)" strokeWidth="5" strokeLinecap="round" />
-              </svg>
-            </span>
-          </h1>
+          <h1 className="menu-hero-title font-display">Notre menu</h1>
           <p className="menu-hero-sub">Compose ta commande — <strong>{totalPlats} plats</strong> t'attendent au marché.</p>
 
           <a href="tel:+221761270766" className="appel-commande">

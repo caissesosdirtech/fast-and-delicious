@@ -117,13 +117,8 @@ export default function MenuVitrine() {
   return (
     <div className="menu-vitrine">
       <div className="vitrine-hero">
-        <div className="eyebrow-badge">
-          <span className="eyebrow-flag" aria-hidden="true">🍔</span>
-          <span className="eyebrow-text">Fast &amp; Delicious</span>
-          <span className="eyebrow-flag eyebrow-flag-right" aria-hidden="true">🔥</span>
-        </div>
         <h1 className="font-display">Notre menu complet</h1>
-        <p>{totalPlats} plats répartis en {categories.length} rubriques — tout ce que propose Fast &amp; Delicious.</p>
+        <p>{totalPlats} plats répartis en {categories.length} rubriques — tout ce que propose notre cuisine.</p>
         <a href="tel:+221761270766" className="appel-commande">
           📞 Commander par téléphone : <span className="font-mono">+221 76 127 07 66</span>
         </a>

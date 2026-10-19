@@ -23,8 +23,7 @@ export default function StaffSidebar({ items, rubriqueActive, onChangerRubrique,
     <div className="staff-layout">
       <aside className="staff-sidebar">
         <div className="staff-sidebar-logo">
-          <img src="/logo-fast-delicious.jpg" alt="Fast & Delicious" />
-          <span>FAST FOOD</span>
+          <span>ESPACE STAFF</span>
         </div>
         <nav className="staff-sidebar-nav">
           {items.map((item, i) => (

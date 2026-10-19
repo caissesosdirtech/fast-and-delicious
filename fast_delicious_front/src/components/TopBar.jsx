@@ -11,7 +11,7 @@ export default function TopBar() {
   return (
     <header className="topbar">
       <Link to="/" className="brand">
-        <img src="/logo-fast-delicious.jpg" alt="Fast & Delicious" className="brand-logo" />
+        <span className="brand-text font-display">Menu</span>
       </Link>
 
       <div className="topbar-right">

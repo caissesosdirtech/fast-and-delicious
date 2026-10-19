@@ -40,10 +40,7 @@ export default function LoginStaff() {
 
         {/* Panneau de marque */}
         <div className="login-brand">
-          <div className="login-brand-logo">
-            <img src="/logo-fast-delicious.jpg" alt="Fast & Delicious" />
-          </div>
-          <h1 className="font-display">Fast &amp; Delicious</h1>
+          <h1 className="font-display">Espace staff</h1>
           <p>Espace réservé à l'équipe caisse et cuisine. Suivez les commandes et gérez la file en direct.</p>
 
           <div className="login-brand-tags">
@@ -69,7 +66,7 @@ export default function LoginStaff() {
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="ex. admin"
+              placeholder="ex. caissiere1"
               required
             />
           </div>

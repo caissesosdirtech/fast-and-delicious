@@ -7,11 +7,6 @@ export default function Footer() {
     <footer className="app-footer">
       <div className="app-footer-inner">
 
-        <div className="app-footer-brand">
-          <img src="/logo-fast-delicious.jpg" alt="Fast & Delicious" className="app-footer-logo" />
-          <span className="font-display">Fast &amp; Delicious</span>
-        </div>
-
         <div className="app-footer-copyright">
           <span>© {annee} <strong>Deep Mind Technologie (DMT)</strong> — Tous droits réservés</span>
           <span className="footer-sep" aria-hidden="true">·</span>
