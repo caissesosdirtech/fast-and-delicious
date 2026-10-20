@@ -163,6 +163,46 @@ export default function CaissiereDashboard() {
     if (!stats) return <p className="chargement-texte">Chargement...</p>;
 
     const parStatut = stats.commandes_par_statut;
+
+    // Rubrique 0 = Tableau de bord : les statistiques du jour (pas la liste des commandes).
+    if (rubrique === 0) {
+      return (
+        <div>
+          <div className="kpi-row">
+            <KpiCard label="Chiffre d'affaires" valeur={`${Number(stats.chiffre_affaires).toLocaleString("fr-FR")} F`} couleur="var(--green)" />
+            <KpiCard label="Commandes du jour" valeur={stats.nombre_commandes} />
+            <KpiCard label="Panier moyen" valeur={`${Number(stats.panier_moyen).toLocaleString("fr-FR")} F`} />
+            <KpiCard label="En cours" valeur={commandes.length} couleur="var(--gold)" />
+          </div>
+
+          <h3 className="section-titre">Répartition des commandes</h3>
+          <div className="stats-statuts">
+            <div className="stat-statut"><span>En attente</span><strong>{parStatut.EN_ATTENTE || 0}</strong></div>
+            <div className="stat-statut"><span>Validées</span><strong>{parStatut.VALIDEE || 0}</strong></div>
+            <div className="stat-statut"><span>Prêtes</span><strong>{parStatut.PRETE || 0}</strong></div>
+            <div className="stat-statut"><span>Terminées</span><strong>{parStatut.SERVIE || 0}</strong></div>
+            <div className="stat-statut"><span>Annulées</span><strong>{parStatut.ANNULEE || 0}</strong></div>
+          </div>
+
+          <h3 className="section-titre">Top plats du jour</h3>
+          {(!stats.top_plats || stats.top_plats.length === 0) ? (
+            <EmptyState icon="📊" title="Aucune vente pour le moment" />
+          ) : (
+            <div className="top-plats">
+              {stats.top_plats.map((p, i) => (
+                <div className="top-plat" key={p.nom}>
+                  <span className="top-plat-rang">{i + 1}</span>
+                  <span className="top-plat-nom">{p.nom}</span>
+                  <strong>{p.quantite}</strong>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Rubrique 1 = Commandes : la liste des commandes en cours + actions.
     return (
       <div>
         <div className="kpi-row">

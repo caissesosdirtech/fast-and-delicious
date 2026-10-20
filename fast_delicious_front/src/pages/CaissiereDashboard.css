@@ -77,3 +77,17 @@
 /* Bouton reçu de paiement */
 .icone-recu{ background:#8A5A1E; }
 .detail-btn-recu{ background:#8A5A1E; }
+
+/* Tableau de bord — répartition par statut + top plats */
+.stats-statuts{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
+.stat-statut{ flex:1 1 120px; background:#fff; border:1.5px solid var(--line); border-radius:12px;
+  padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
+.stat-statut span{ font-size:12px; color:var(--ink-soft); font-weight:600; }
+.stat-statut strong{ font-size:22px; font-weight:800; color:var(--ink); }
+.top-plats{ display:flex; flex-direction:column; gap:8px; }
+.top-plat{ display:flex; align-items:center; gap:12px; background:#fff; border:1.5px solid var(--line);
+  border-radius:12px; padding:10px 14px; }
+.top-plat-rang{ width:26px; height:26px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+  background:var(--gold); color:var(--ink); border-radius:50%; font-weight:800; font-size:13px; }
+.top-plat-nom{ flex:1; font-weight:600; }
+.top-plat strong{ font-size:18px; font-weight:800; color:var(--red-dim); }
