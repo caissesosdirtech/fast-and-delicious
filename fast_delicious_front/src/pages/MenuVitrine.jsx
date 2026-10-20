@@ -88,6 +88,12 @@ function PlatVitrine({ plat, catIcon, delai }) {
   );
 }
 
+// Repère la catégorie "Formules" pour l'afficher en vitrine spéciale (affiches toutes faites)
+// et la sortir des rubriques normales — comme sur le menu principal.
+function estCategorieFormule(nom) {
+  return (nom || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").includes("formule");
+}
+
 export default function MenuVitrine() {
   const [categories, setCategories] = useState([]);
   const [chargement, setChargement] = useState(true);
@@ -114,6 +120,10 @@ export default function MenuVitrine() {
   if (erreur) return <div className="vitrine-etat">{erreur}</div>;
 
   const totalPlats = categories.reduce((acc, c) => acc + c.plats.length, 0);
+  const categoriesNormales = categories.filter((cat) => !estCategorieFormule(cat.nom));
+  const formulesPosters = categories
+    .filter((cat) => estCategorieFormule(cat.nom))
+    .flatMap((cat) => cat.plats);
 
   return (
     <div className="menu-vitrine">
@@ -125,16 +135,40 @@ export default function MenuVitrine() {
         </a>
       </div>
 
+      {/* Vitrine spéciale "Nos formules" — affiches toutes faites */}
+      {formulesPosters.length > 0 && (
+        <section className="vitrine-formules">
+          <div className="vitrine-formules-head">
+            <span className="vitrine-formules-eyebrow">✨ À NE PAS MANQUER</span>
+            <h2 className="font-display">Nos formules</h2>
+          </div>
+          <div className="vitrine-formules-row">
+            {formulesPosters.map((plat) => {
+              const poster = plat.image || photoLocalePlat(plat.nom);
+              return (
+                <div className="vitrine-formule" key={plat.id}>
+                  {poster ? (
+                    <img src={poster} alt={plat.nom} loading="lazy" />
+                  ) : (
+                    <span aria-hidden="true">🍱</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Navigation rapide entre toutes les rubriques */}
       <nav className="vitrine-nav">
-        {categories.map((cat) => (
+        {categoriesNormales.map((cat) => (
           <button key={cat.id} onClick={() => allerVersCategorie(cat.id)}>
             <span>{iconePourCategorie(cat.nom)}</span> {cat.nom}
           </button>
         ))}
       </nav>
 
-      {categories.map((cat, i) => (
+      {categoriesNormales.map((cat, i) => (
         <CategorieVitrine key={cat.id} cat={cat} index={i} sectionRef={enregistrerSection} />
       ))}
 

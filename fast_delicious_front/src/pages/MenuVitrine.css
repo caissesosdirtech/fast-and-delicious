@@ -150,3 +150,13 @@
   .vitrine-hero h1{ font-size:26px; }
   .vitrine-card-img{ height:120px; }
 }
+
+/* Vitrine spéciale "Nos formules" (affiches toutes faites) */
+.vitrine-formules{ margin:8px auto 18px; max-width:1100px; padding:0 18px; }
+.vitrine-formules-head{ text-align:center; margin-bottom:14px; }
+.vitrine-formules-eyebrow{ font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--gold); }
+.vitrine-formules-head h2{ margin:4px 0 0; font-size:26px; font-weight:900; }
+.vitrine-formules-row{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; }
+.vitrine-formule{ flex:0 0 auto; width:180px; border-radius:16px; overflow:hidden;
+  box-shadow:0 10px 24px -12px rgba(0,0,0,.5); background:#fff; }
+.vitrine-formule img{ width:100%; display:block; }
