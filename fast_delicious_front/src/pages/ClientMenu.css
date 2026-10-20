@@ -508,3 +508,22 @@
   .stand-enseigne-count{ display:none; }
   .marquee-track span{ font-size:10.5px; padding:0 18px; }
 }
+
+/* ---------- Vitrine spéciale "Nos formules" (affiches toutes faites) ---------- */
+.formules-hero{ margin:14px 0 4px; padding:18px 16px 20px; border-radius:22px;
+  background:linear-gradient(135deg,#13213b,#20335a); color:#fff; }
+.formules-hero-head{ margin-bottom:14px; }
+.formules-hero-eyebrow{ font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--gold); }
+.formules-hero-head h2{ margin:4px 0 2px; font-size:26px; font-weight:900; }
+.formules-hero-head p{ margin:0; color:#cdd6e6; font-size:13px; }
+.formules-row{ display:flex; gap:14px; overflow-x:auto; padding-bottom:6px; }
+.formule-poster{ flex:0 0 auto; width:210px; background:#fff; border-radius:16px; overflow:hidden;
+  box-shadow:0 10px 24px -10px rgba(0,0,0,.5); display:flex; flex-direction:column; }
+.formule-poster-media{ position:relative; }
+.formule-poster-media img{ width:100%; display:block; }
+.formule-poster-btn{ margin:0; padding:12px; border:none; background:var(--gold); color:var(--ink);
+  font-weight:800; font-size:13.5px; cursor:pointer; transition:background .15s ease, color .15s ease; }
+.formule-poster-btn:hover{ background:var(--red); color:#fff; }
+.formule-poster-stepper{ display:flex; align-items:center; justify-content:space-between; background:var(--ink); color:#fff; }
+.formule-poster-stepper button{ flex:1; background:none; border:none; color:#fff; font-size:20px; padding:10px; cursor:pointer; }
+.formule-poster-stepper span{ font-weight:800; min-width:28px; text-align:center; }

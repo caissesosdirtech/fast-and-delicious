@@ -28,6 +28,12 @@ def _norm(texte):
 
 # (nom de catégorie, ordre d'affichage, [ (nom du plat, prix FCFA, description) ... ])
 CATALOGUE = [
+    # Vitrine spéciale "Nos formules" (affichée en haut du menu, affiches toutes faites).
+    ("Formules", 0, [
+        ("Formule 1 — Doukouré", 2000, "Pain haricots + jus local"),
+        ("Formule 2 — Diaytaar", 3200, "Hot dog + frites + soda"),
+        ("Formule 3 — Beuri Maana", 3300, "Nuggets + frites + jus"),
+    ]),
     ("Fast Food & Snacks", 1, [
         ("Wrap poulet", 3000, "Chicken wrap · 300 g"),
         ("Chicken tenders", 2000, "Filets de poulet panés (5 à 6 pièces) · 200 g"),

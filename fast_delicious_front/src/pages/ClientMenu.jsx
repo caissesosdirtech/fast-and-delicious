@@ -147,11 +147,27 @@ export default function ClientMenu() {
     [categories]
   );
 
+  // Catégorie "Formules" : vitrine spéciale en haut (affiches toutes faites). On la repère
+  // par son nom et on la sort des rubriques normales pour ne pas l'afficher deux fois.
+  const estCategorieFormule = (nom) =>
+    (nom || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .includes("formule");
+
+  const formulesPosters = useMemo(
+    () => categories.filter((cat) => estCategorieFormule(cat.nom)).flatMap((cat) => cat.plats),
+    [categories]
+  );
+
   const categoriesSansFormules = useMemo(
-    () => categories.map((cat) => ({
-      ...cat,
-      plats: cat.plats.filter((p) => !(p.groupes_choix?.length > 0)),
-    })),
+    () => categories
+      .filter((cat) => !estCategorieFormule(cat.nom))
+      .map((cat) => ({
+        ...cat,
+        plats: cat.plats.filter((p) => !(p.groupes_choix?.length > 0)),
+      })),
     [categories]
   );
 
@@ -348,6 +364,46 @@ export default function ClientMenu() {
             })}
           </div>
         </div>
+      )}
+
+      {/* Vitrine spéciale "Nos formules" : affiches toutes faites, mises en avant en haut */}
+      {formulesPosters.length > 0 && !recherche.trim() && (
+        <section className="formules-hero">
+          <div className="formules-hero-head">
+            <span className="formules-hero-eyebrow">✨ À NE PAS MANQUER</span>
+            <h2 className="font-display">Nos formules</h2>
+            <p>Repas complets à prix malin</p>
+          </div>
+          <div className="formules-row">
+            {formulesPosters.map((plat) => {
+              const quantite = quantitePourPlat(plat.id);
+              const poster = plat.image || photoLocalePlat(plat.nom);
+              return (
+                <div className="formule-poster" key={plat.id}>
+                  <div className="formule-poster-media">
+                    {poster ? (
+                      <img src={poster} alt={plat.nom} loading="lazy" />
+                    ) : (
+                      <span aria-hidden="true">🍱</span>
+                    )}
+                    {quantite > 0 && <span className="plat-thumb-badge">{quantite}</span>}
+                  </div>
+                  {quantite > 0 ? (
+                    <div className="formule-poster-stepper">
+                      <button onClick={() => modifierQuantite(plat, -1)} aria-label={`Retirer ${plat.nom}`}>−</button>
+                      <span>{quantite}</span>
+                      <button onClick={() => modifierQuantite(plat, 1)} aria-label={`Ajouter ${plat.nom}`}>+</button>
+                    </div>
+                  ) : (
+                    <button className="formule-poster-btn" onClick={() => ajouterAuPanier(plat)}>
+                      + Ajouter · {Number(plat.prix).toLocaleString("fr-FR")} F
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
       {/* Navigation des rubriques, sticky en haut du scroll */}

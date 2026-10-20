@@ -21,6 +21,11 @@ function normaliser(texte) {
 // Règles testées dans l'ordre : la première qui correspond gagne.
 // `motifs` : au moins un groupe de mots doit être entièrement présent dans le nom normalisé.
 const REGLES = [
+  // Formules (affiches toutes faites). Placées en tête : noms du type "Formule 1 — Doukouré".
+  { fichier: "formule-doukoure.png",     motifs: [["doukoure"]] },
+  { fichier: "formule-diaytaar.png",     motifs: [["diaytaar"]] },
+  { fichier: "formule-beuri-maana.png",  motifs: [["beuri"], ["maana"]] },
+
   { fichier: "wrap-poulet.png",          motifs: [["wrap"]] },
   { fichier: "crepe-jambon-fromage.png", motifs: [["crepe", "jambon"], ["crepe", "fromage"]] },
   { fichier: "crepe-nutella.png",        motifs: [["crepe", "nutella"], ["crepe", "mordjene"], ["crepe", "sucre"], ["crepe", "chocolat"]] },
