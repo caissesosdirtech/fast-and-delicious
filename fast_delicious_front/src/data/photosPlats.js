@@ -19,7 +19,7 @@ function normaliser(texte) {
 }
 
 // Règles testées dans l'ordre : la première qui correspond gagne.
-// `motifs` : tous les mots doivent être présents dans le nom normalisé du plat.
+// `motifs` : au moins un groupe de mots doit être entièrement présent dans le nom normalisé.
 const REGLES = [
   { fichier: "wrap-poulet.png",          motifs: [["wrap"]] },
   { fichier: "crepe-jambon-fromage.png", motifs: [["crepe", "jambon"], ["crepe", "fromage"]] },
@@ -30,10 +30,19 @@ const REGLES = [
   { fichier: "pain-haricots.png",        motifs: [["pain", "haricot"], ["haricot"]] },
   { fichier: "pain-thon.png",            motifs: [["pain", "thon"], ["thon"]] },
   { fichier: "donuts-bissap.png",        motifs: [["donut"]] },
+
+  // --- Jus naturels (un par parfum). À placer AVANT la règle générique "jus" et avant "thé bissap". ---
+  { fichier: "jus-bissap.png",           motifs: [["jus", "bissap"]] },
+  { fichier: "jus-bouye.png",            motifs: [["jus", "bouye"], ["jus", "pain de singe"], ["jus", "baobab"]] },
+  { fichier: "jus-maad.png",             motifs: [["jus", "maad"], ["jus", "madd"]] },
+  { fichier: "jus-ditakh.png",           motifs: [["jus", "ditakh"], ["jus", "ditax"]] },
+  { fichier: "jus-gingembre.png",        motifs: [["jus", "gingembre"]] },
+  { fichier: "jus-citron.png",           motifs: [["jus", "citron"]] },
+
   { fichier: "cafe-touba.png",           motifs: [["touba"], ["cafe"]] },
   { fichier: "the-menthe.png",           motifs: [["menthe"]] },
-  { fichier: "the-bissap.png",           motifs: [["the", "bissap"], ["bissap"]] },
-  { fichier: "jus-locaux.png",           motifs: [["jus"]] },
+  { fichier: "the-bissap.png",           motifs: [["the", "bissap"]] },
+  { fichier: "jus-locaux.png",           motifs: [["jus"]] }, // "Jus locaux en canette" (assortiment)
   { fichier: "fanta-coca-sprite.png",    motifs: [["fanta"], ["coca"], ["sprite"], ["soda"]] },
 ];
 

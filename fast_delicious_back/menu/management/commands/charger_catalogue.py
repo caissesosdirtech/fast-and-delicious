@@ -45,7 +45,13 @@ CATALOGUE = [
         # Vide pour le moment (aucune grillade dans le catalogue JOJ fourni).
     ]),
     ("Boissons / Jus naturel", 4, [
-        ("Jus locaux en canette", 600, "Bissap, bouye, ditakh, maad, gingembre, citron · 25 cl"),
+        # Jus naturels en canette, un par parfum (25 cl) — 600 F chacun.
+        ("Jus Bissap", 600, "Hibiscus · 25 cl"),
+        ("Jus Bouyé", 600, "Pain de singe (baobab) · 25 cl"),
+        ("Jus Maad", 600, "Saba senegalensis · 25 cl"),
+        ("Jus Ditakh", 600, "Détar (ditakh) · 25 cl"),
+        ("Jus Gingembre", 600, "Gingembre frais · 25 cl"),
+        ("Jus Citron", 600, "Citron pressé · 25 cl"),
         ("Café Touba", 300, "Au poivre de Sélim (djar) et clou de girofle · 20 cl"),
         ("Thé à la menthe", 300, "Mint tea · 20 cl"),
         ("Thé bissap", 300, "Hibiscus & menthe · 20 cl"),
