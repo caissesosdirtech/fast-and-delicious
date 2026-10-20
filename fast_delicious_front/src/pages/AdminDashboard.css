@@ -139,3 +139,20 @@
 .cmd-btn-vert{ background:var(--green); }
 .cmd-btn-rouge{ background:var(--red); }
 .cmd-btn-recu{ background:#8A5A1E; }
+
+/* Graphique 7 derniers jours (Statistiques) */
+.chart7{ display:flex; align-items:flex-end; gap:10px; min-height:170px; padding-top:8px; }
+.chart7-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.chart7-val{ font-size:10.5px; color:var(--ink-soft); height:14px; }
+.chart7-bar-wrap{ width:100%; height:120px; display:flex; align-items:flex-end; }
+.chart7-bar{ width:100%; border-radius:7px 7px 0 0; background:linear-gradient(var(--gold), var(--red)); min-height:3px; }
+.chart7-label{ font-size:11px; color:var(--ink-soft); font-weight:600; }
+
+/* Dashboard résumé — dernières commandes */
+.resume-liste{ display:flex; flex-direction:column; gap:8px; }
+.resume-row{ display:flex; align-items:center; gap:12px; background:#fff; border:1.5px solid var(--line);
+  border-radius:12px; padding:10px 14px; cursor:pointer; }
+.resume-row:hover{ border-color:var(--gold); }
+.resume-articles{ flex:1; font-size:13px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.resume-total{ font-weight:800; color:var(--red-dim); }
+.resume-hint{ margin:12px 2px 0; font-size:12.5px; color:var(--ink-soft); }

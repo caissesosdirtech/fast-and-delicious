@@ -724,6 +724,36 @@ export default function AdminDashboard() {
           )}
         </div>
 
+        {/* =====================================================
+            GRAPHIQUE DES 7 DERNIERS JOURS
+        ====================================================== */}
+        {Array.isArray(stats.ventes_7_jours) && stats.ventes_7_jours.length > 0 && (
+          <div className="admin-panel admin-panel-wide">
+            <h3>Ventes des 7 derniers jours</h3>
+            <div className="chart7">
+              {(() => {
+                const v = stats.ventes_7_jours;
+                const maxV = Math.max(...v.map((d) => Number(d.total) || 0), 1);
+                const jours = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
+                return v.map((d) => {
+                  const total = Number(d.total) || 0;
+                  const hauteur = Math.round((total / maxV) * 100);
+                  const dt = new Date(d.date);
+                  return (
+                    <div className="chart7-col" key={d.date}>
+                      <div className="chart7-val font-mono">{total ? total.toLocaleString("fr-FR") : ""}</div>
+                      <div className="chart7-bar-wrap">
+                        <div className="chart7-bar" style={{ height: `${Math.max(hauteur, 2)}%` }} />
+                      </div>
+                      <div className="chart7-label">{jours[dt.getDay()]} {dt.getDate()}</div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        )}
+
         {ticketOuvert && (
           <TicketModal
             commande={ticketOuvert}
@@ -733,6 +763,79 @@ export default function AdminDashboard() {
           />
         )}
 
+      </div>
+    );
+  }
+
+  /*
+   * ============================================================
+   * DASHBOARD = résumé court (KPI + dernières commandes).
+   * Les détails complets sont dans l'onglet Statistiques.
+   * ============================================================
+   */
+  function contenuResume() {
+    if (erreur) {
+      return (
+        <div className="admin-etat">
+          <span aria-hidden="true">⚠️</span>
+          <p>{erreur}</p>
+          <button className="refresh-btn" onClick={() => charger()}>🔄 Réessayer</button>
+        </div>
+      );
+    }
+    if (!stats) {
+      return <p className="chargement-texte">Chargement...</p>;
+    }
+    const recentes = Array.isArray(stats.commandes_recentes)
+      ? stats.commandes_recentes.slice(0, 5)
+      : [];
+    return (
+      <div className="admin-dashboard">
+        <div className="historique-bandeau">
+          🟢 Données du jour — <strong>{dateLisible(stats.date || "")}</strong>
+        </div>
+
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-label">Commandes aujourd'hui</div>
+            <div className="kpi-value font-display">{Number(stats.nombre_commandes || 0).toLocaleString("fr-FR")}</div>
+          </div>
+          <div className="kpi-card kpi-accent">
+            <div className="kpi-label">Chiffre d'affaires</div>
+            <div className="kpi-value font-display">{Number(stats.chiffre_affaires || 0).toLocaleString("fr-FR")}<span> FCFA</span></div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Panier moyen</div>
+            <div className="kpi-value font-display">{Number(stats.panier_moyen || 0).toLocaleString("fr-FR")}<span> FCFA</span></div>
+          </div>
+        </div>
+
+        <div className="admin-panel admin-panel-wide">
+          <h3>Dernières commandes</h3>
+          {recentes.length === 0 ? (
+            <EmptyState icon="🧾" title="Aucune commande pour le moment" />
+          ) : (
+            <div className="resume-liste">
+              {recentes.map((cmd) => (
+                <div className="resume-row" key={cmd.id} onClick={() => setTicketOuvert(cmd)}>
+                  <span className="font-mono">#{cmd.id}</span>
+                  <span className="resume-articles">
+                    {Array.isArray(cmd.lignes) ? cmd.lignes.map((l) => `${l.quantite}x ${l.plat_nom}`).join(", ") : "—"}
+                  </span>
+                  <span className={`recent-badge statut-${COULEUR_STATUT[cmd.statut] || "gold"}`}>
+                    {LABELS_STATUT[cmd.statut] || cmd.statut}
+                  </span>
+                  <span className="font-mono resume-total">{Number(cmd.total || 0).toLocaleString("fr-FR")} F</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="resume-hint">Gérer toutes les commandes dans l'onglet 🧾 Commandes · détails et graphiques dans 📈 Statistiques.</p>
+        </div>
+
+        {ticketOuvert && (
+          <TicketModal commande={ticketOuvert} onFermer={() => setTicketOuvert(null)} />
+        )}
       </div>
     );
   }
@@ -766,11 +869,14 @@ export default function AdminDashboard() {
     case 7:
       return <CommandesContenu />;
 
+    case 8:
+      return contenuTableauDeBord();
+
     case 9:
       return <ParametresContenu />;
 
     default:
-      return contenuTableauDeBord();
+      return contenuResume();
 
   }
 }
