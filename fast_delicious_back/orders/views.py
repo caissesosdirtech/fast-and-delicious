@@ -317,9 +317,15 @@ class HistoriqueRecentView(generics.ListAPIView):
     permission_classes = [EstCaissiere]
 
     def get_queryset(self):
+        # ?limite=N (défaut 10, borné à 100) — permet un bouton "Voir plus" côté tableau de bord.
+        try:
+            limite = int(self.request.query_params.get("limite", 10))
+        except (TypeError, ValueError):
+            limite = 10
+        limite = max(1, min(limite, 100))
         return Commande.objects.filter(
             statut__in=[Commande.Statut.SERVIE, Commande.Statut.ANNULEE],
-        ).order_by("-date_creation").prefetch_related("lignes__plat")[:10]
+        ).order_by("-date_creation").prefetch_related("lignes__plat")[:limite]
 
 
 class ClientsLivraisonView(APIView):

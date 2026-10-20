@@ -156,3 +156,14 @@
 .resume-articles{ flex:1; font-size:13px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .resume-total{ font-weight:800; color:var(--red-dim); }
 .resume-hint{ margin:12px 2px 0; font-size:12.5px; color:var(--ink-soft); }
+
+/* Historique "dernières commandes terminées" + Voir plus */
+.histo-liste{ display:flex; flex-direction:column; gap:8px; }
+.histo-row{ display:flex; align-items:center; gap:12px; background:#fff; border:1.5px solid var(--line);
+  border-radius:12px; padding:10px 14px; cursor:pointer; }
+.histo-row:hover{ border-color:var(--gold); }
+.histo-articles{ flex:1; font-size:13px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.histo-total{ font-weight:800; color:var(--red-dim); }
+.histo-voir-plus{ margin:14px auto 0; display:block; background:var(--ink); color:var(--cream); border:none;
+  border-radius:10px; padding:10px 22px; font-weight:700; font-size:13px; cursor:pointer; }
+.histo-voir-plus:hover{ background:var(--red); }
