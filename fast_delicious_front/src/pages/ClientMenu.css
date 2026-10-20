@@ -510,7 +510,8 @@
 }
 
 /* ---------- Vitrine spéciale "Nos formules" (affiches toutes faites) ---------- */
-.formules-hero{ margin:14px 0 4px; padding:18px 16px 20px; border-radius:22px;
+.formules-hero{ width:calc(100% - 36px); max-width:1064px; margin:14px auto 4px;
+  padding:18px 16px 20px; border-radius:22px;
   background:linear-gradient(135deg,#13213b,#20335a); color:#fff; }
 .formules-hero-head{ margin-bottom:14px; text-align:center; }
 .formules-hero-eyebrow{ font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--gold); }
