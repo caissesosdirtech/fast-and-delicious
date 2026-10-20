@@ -20,10 +20,6 @@ export default function LoginStaff() {
       const profil = await connexion(username, password);
       if (profil.role === "caissiere" || profil.role === "admin") {
         navigate("/caisse");
-      } else if (profil.role === "cuisine") {
-        navigate("/cuisine");
-      } else if (profil.role === "livreur") {
-        navigate("/livraison");
       } else {
         navigate("/");
       }

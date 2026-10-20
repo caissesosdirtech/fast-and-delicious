@@ -73,3 +73,7 @@
 .liste-simple-motif{ font-size:11px; color:var(--red-dim); font-style:italic; margin-top:2px; }
 .liste-simple-droite{ display:flex; align-items:center; gap:10px; }
 .liste-simple-total{ font-weight:700; }
+
+/* Bouton reçu de paiement */
+.icone-recu{ background:#8A5A1E; }
+.detail-btn-recu{ background:#8A5A1E; }

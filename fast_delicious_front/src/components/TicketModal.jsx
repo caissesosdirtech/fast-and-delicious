@@ -14,7 +14,8 @@ const LABELS_STATUT = {
  */
 export default function TicketModal({ commande, onFermer }) {
   const { utilisateur } = useAuth();
-  const peutImprimer = utilisateur?.role === "caissiere" && commande.statut === "SERVIE";
+  const estStaff = utilisateur?.role === "caissiere" || utilisateur?.role === "admin";
+  const peutImprimer = estStaff && (commande.statut === "SERVIE" || commande.paiement_confirme);
 
   return (
     <div className="ticket-modal-overlay" onClick={onFermer}>
@@ -22,7 +23,7 @@ export default function TicketModal({ commande, onFermer }) {
         <button className="ticket-modal-fermer" onClick={onFermer}>✕</button>
 
         <div id="ticket-a-imprimer">
-          <h3 className="ticket-modal-titre">Ticket #{commande.id}</h3>
+          <h3 className="ticket-modal-titre">Reçu de paiement #{commande.id}</h3>
           <div className="ticket-modal-sub">
             {commande.mode_commande === "LIVRAISON" ? "🛵 Livraison" : (commande.numero_table ? `Table ${commande.numero_table}` : "Retrait sur place")}
             {" — "}
@@ -68,7 +69,7 @@ export default function TicketModal({ commande, onFermer }) {
 
         {peutImprimer && (
           <button className="ticket-modal-imprimer" onClick={() => window.print()}>
-            🖨️ Imprimer le ticket
+            🖨️ Imprimer le reçu
           </button>
         )}
       </div>

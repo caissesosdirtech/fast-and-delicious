@@ -49,7 +49,13 @@ class FileAttenteCaisseView(generics.ListAPIView):
     permission_classes = [EstCaissiere]
 
     def get_queryset(self):
-        qs = Commande.objects.filter(statut=Commande.Statut.EN_ATTENTE)
+        # Parcours simplifié : la caissière/l'admin suit toute la commande (en attente,
+        # validée, prête) sur un seul écran, jusqu'à ce qu'elle soit terminée (servie).
+        qs = Commande.objects.filter(statut__in=[
+            Commande.Statut.EN_ATTENTE,
+            Commande.Statut.VALIDEE,
+            Commande.Statut.PRETE,
+        ])
         if self.request.user.lieu_id:
             qs = qs.filter(lieu_id=self.request.user.lieu_id)
         return qs.prefetch_related("lignes__plat")
@@ -137,14 +143,17 @@ class DemarrerPreparationView(APIView):
 
 
 class MarquerPreteView(APIView):
-    """PATCH /api/cuisine/commandes/<id>/prete/ — le plat est prêt (à servir, ou à faire partir en livraison)."""
+    """PATCH /api/caisse/commandes/<id>/prete/ — la caissière/l'admin marque la commande prête.
+    Parcours simplifié : on passe directement de « Validée » à « Prête » (l'étape cuisine n'est
+    plus un rôle séparé)."""
 
-    permission_classes = [EstCuisinier]
+    permission_classes = [EstCaissiere]
 
     def patch(self, request, pk):
         commande = get_object_or_404(Commande, pk=pk)
-        if commande.statut != Commande.Statut.EN_PREPARATION:
-            raise PermissionDenied("Cette commande n'est pas en cours de préparation.")
+        # On accepte aussi EN_PREPARATION pour d'anciennes commandes déjà en cours.
+        if commande.statut not in [Commande.Statut.VALIDEE, Commande.Statut.EN_PREPARATION]:
+            raise PermissionDenied("Cette commande doit d'abord être validée.")
 
         commande.statut = Commande.Statut.PRETE
         commande.date_prete = timezone.now()
@@ -152,23 +161,19 @@ class MarquerPreteView(APIView):
         commande.enregistrer_historique()
 
         notifier_client(commande)
-        if commande.mode_commande == Commande.ModeCommande.LIVRAISON:
-            notifier_livraison(commande, evenement="commande_prete")
 
         return Response(CommandeSerializer(commande).data)
 
 
 class MarquerServieView(APIView):
-    """PATCH /api/commandes/<id>/servie/ — clôture une commande retirée SUR PLACE.
-    Les commandes en livraison passent par le circuit livreur (voir MarquerLivreeView).
+    """PATCH /api/caisse/commandes/<id>/terminer/ — la caissière/l'admin clôture la commande
+    (sur place comme en livraison). Dernière étape du parcours simplifié avant le reçu.
     """
 
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [EstCaissiere]
 
     def patch(self, request, pk):
         commande = get_object_or_404(Commande, pk=pk)
-        if commande.mode_commande == Commande.ModeCommande.LIVRAISON:
-            raise PermissionDenied("Cette commande est en livraison ; elle doit être clôturée par le livreur.")
         if commande.statut != Commande.Statut.PRETE:
             raise PermissionDenied("Cette commande n'est pas encore prête.")
 

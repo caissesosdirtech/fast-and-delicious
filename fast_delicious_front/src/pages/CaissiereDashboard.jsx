@@ -88,8 +88,27 @@ export default function CaissiereDashboard() {
     setEnTraitement((p) => ({ ...p, [commandeId]: true }));
     try {
       await client.patch(`caisse/commandes/${commandeId}/valider/`);
-      setCommandes((prev) => prev.filter((c) => c.id !== commandeId));
-      setSelectionnee((prev) => (prev?.id === commandeId ? null : prev));
+      charger();
+    } finally {
+      setEnTraitement((p) => ({ ...p, [commandeId]: false }));
+    }
+  }
+
+  async function prete(commandeId) {
+    setEnTraitement((p) => ({ ...p, [commandeId]: true }));
+    try {
+      await client.patch(`caisse/commandes/${commandeId}/prete/`);
+      charger();
+    } finally {
+      setEnTraitement((p) => ({ ...p, [commandeId]: false }));
+    }
+  }
+
+  async function terminer(commandeId) {
+    setEnTraitement((p) => ({ ...p, [commandeId]: true }));
+    try {
+      await client.patch(`caisse/commandes/${commandeId}/terminer/`);
+      charger();
     } finally {
       setEnTraitement((p) => ({ ...p, [commandeId]: false }));
     }
@@ -147,16 +166,16 @@ export default function CaissiereDashboard() {
     return (
       <div>
         <div className="kpi-row">
-          <KpiCard label="Commandes en attente" valeur={commandes.length} couleur="var(--gold)" />
-          <KpiCard label="En préparation" valeur={parStatut.EN_PREPARATION || 0} />
+          <KpiCard label="En cours" valeur={commandes.length} couleur="var(--gold)" />
+          <KpiCard label="Validées" valeur={parStatut.VALIDEE || 0} />
           <KpiCard label="Prêtes" valeur={parStatut.PRETE || 0} couleur="var(--green)" />
           <KpiCard label="Commandes du jour" valeur={stats.nombre_commandes} />
         </div>
 
-        <h3 className="section-titre">Commandes en attente</h3>
+        <h3 className="section-titre">Commandes en cours</h3>
 
         {commandes.length === 0 ? (
-          <EmptyState icon="📥" title="Aucune commande en attente" />
+          <EmptyState icon="📥" title="Aucune commande en cours" />
         ) : (
           <div className="caisse-table-wrap">
             <table className="caisse-table">
@@ -179,8 +198,21 @@ export default function CaissiereDashboard() {
                     <td>{badgeStatut(cmd.statut)}</td>
                     <td onClick={(e) => e.stopPropagation()}>
                       <div className="action-icones">
-                        <button className="icone-action icone-valider" title="Valider" disabled={enTraitement[cmd.id]} onClick={() => valider(cmd.id)}>✓</button>
-                        <button className="icone-action icone-annuler" title="Annuler" disabled={enTraitement[cmd.id]} onClick={() => annuler(cmd.id)}>✕</button>
+                        {cmd.statut === "EN_ATTENTE" && (
+                          <button className="icone-action icone-valider" title="Valider & encaisser" disabled={enTraitement[cmd.id]} onClick={() => valider(cmd.id)}>✓</button>
+                        )}
+                        {cmd.statut === "VALIDEE" && (
+                          <button className="icone-action icone-valider" title="Marquer prête" disabled={enTraitement[cmd.id]} onClick={() => prete(cmd.id)}>▶</button>
+                        )}
+                        {cmd.statut === "PRETE" && (
+                          <button className="icone-action icone-valider" title="Terminer" disabled={enTraitement[cmd.id]} onClick={() => terminer(cmd.id)}>✔</button>
+                        )}
+                        {cmd.statut !== "SERVIE" && cmd.statut !== "ANNULEE" && (
+                          <button className="icone-action icone-annuler" title="Annuler" disabled={enTraitement[cmd.id]} onClick={() => annuler(cmd.id)}>✕</button>
+                        )}
+                        {(cmd.paiement_confirme || cmd.statut === "SERVIE") && (
+                          <button className="icone-action icone-recu" title="Reçu de paiement" onClick={() => setTicketOuvert(cmd)}>🧾</button>
+                        )}
                         <button className="icone-action icone-voir" title="Voir le détail" onClick={() => setSelectionnee(cmd)}>👁</button>
                       </div>
                     </td>
@@ -197,7 +229,10 @@ export default function CaissiereDashboard() {
             enTraitement={enTraitement[selectionnee.id]}
             onEncaisser={() => encaisser(selectionnee.id)}
             onValider={() => valider(selectionnee.id)}
+            onPrete={() => prete(selectionnee.id)}
+            onTerminer={() => terminer(selectionnee.id)}
             onAnnuler={() => annuler(selectionnee.id)}
+            onRecu={() => setTicketOuvert(selectionnee)}
           />
         )}
       </div>
@@ -212,7 +247,7 @@ export default function CaissiereDashboard() {
   );
 }
 
-function DetailCommande({ commande, enTraitement, onEncaisser, onValider, onAnnuler }) {
+function DetailCommande({ commande, enTraitement, onEncaisser, onValider, onPrete, onTerminer, onAnnuler, onRecu }) {
   return (
     <div className="detail-commande">
       <div className="detail-gauche">
@@ -235,15 +270,36 @@ function DetailCommande({ commande, enTraitement, onEncaisser, onValider, onAnnu
         {commande.paiement_confirme && <div className="detail-paiement-ok">✓ Paiement confirmé</div>}
       </div>
       <div className="detail-droite">
-        <button className="detail-btn detail-btn-valider" disabled={enTraitement} onClick={onValider}>
-          Valider et envoyer en cuisine
-        </button>
-        <button className="detail-btn detail-btn-encaisser" disabled={enTraitement || commande.paiement_confirme} onClick={onEncaisser}>
-          {commande.paiement_confirme ? "✓ Encaissé" : "Encaisser"}
-        </button>
-        <button className="detail-btn detail-btn-annuler" disabled={enTraitement} onClick={onAnnuler}>
-          Annuler la commande
-        </button>
+        {commande.statut === "EN_ATTENTE" && (
+          <>
+            <button className="detail-btn detail-btn-valider" disabled={enTraitement} onClick={onValider}>
+              Valider &amp; encaisser
+            </button>
+            <button className="detail-btn detail-btn-encaisser" disabled={enTraitement || commande.paiement_confirme} onClick={onEncaisser}>
+              {commande.paiement_confirme ? "✓ Encaissé" : "Encaisser"}
+            </button>
+          </>
+        )}
+        {commande.statut === "VALIDEE" && (
+          <button className="detail-btn detail-btn-valider" disabled={enTraitement} onClick={onPrete}>
+            Marquer prête
+          </button>
+        )}
+        {commande.statut === "PRETE" && (
+          <button className="detail-btn detail-btn-valider" disabled={enTraitement} onClick={onTerminer}>
+            Terminer la commande
+          </button>
+        )}
+        {(commande.paiement_confirme || commande.statut === "SERVIE") && (
+          <button className="detail-btn detail-btn-recu" onClick={onRecu}>
+            🧾 Reçu de paiement
+          </button>
+        )}
+        {commande.statut !== "SERVIE" && commande.statut !== "ANNULEE" && (
+          <button className="detail-btn detail-btn-annuler" disabled={enTraitement} onClick={onAnnuler}>
+            Annuler la commande
+          </button>
+        )}
       </div>
     </div>
   );

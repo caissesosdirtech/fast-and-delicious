@@ -13,6 +13,8 @@ urlpatterns = [
     path("caisse/commandes/", views.FileAttenteCaisseView.as_view(), name="caisse-file"),
     path("caisse/commandes/<int:pk>/encaisser/", views.EncaisserCommandeView.as_view(), name="caisse-encaisser"),
     path("caisse/commandes/<int:pk>/valider/", views.ValiderCommandeView.as_view(), name="caisse-valider"),
+    path("caisse/commandes/<int:pk>/prete/", views.MarquerPreteView.as_view(), name="caisse-prete"),
+    path("caisse/commandes/<int:pk>/terminer/", views.MarquerServieView.as_view(), name="caisse-terminer"),
 
     # Cuisine
     path("cuisine/commandes/", views.FileAttenteCuisineView.as_view(), name="cuisine-file"),

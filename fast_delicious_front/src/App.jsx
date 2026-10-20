@@ -5,8 +5,6 @@ import ClientMenu from "./pages/ClientMenu";
 import ClientSuivi from "./pages/ClientSuivi";
 import LoginStaff from "./pages/LoginStaff";
 import CaissiereDashboard from "./pages/CaissiereDashboard";
-import CuisineDashboard from "./pages/CuisineDashboard";
-import LivraisonDashboard from "./pages/LivraisonDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import MenuVitrine from "./pages/MenuVitrine";
 import QRCodes from "./pages/QRCodes";
@@ -28,22 +26,6 @@ export default function App() {
             element={
               <RouteProtegee rolesAutorises={["caissiere", "admin"]}>
                 <CaissiereDashboard />
-              </RouteProtegee>
-            }
-          />
-          <Route
-            path="/cuisine"
-            element={
-              <RouteProtegee rolesAutorises={["cuisine", "admin"]}>
-                <CuisineDashboard />
-              </RouteProtegee>
-            }
-          />
-          <Route
-            path="/livraison"
-            element={
-              <RouteProtegee rolesAutorises={["livreur", "admin"]}>
-                <LivraisonDashboard />
               </RouteProtegee>
             }
           />
