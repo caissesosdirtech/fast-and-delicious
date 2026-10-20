@@ -9,6 +9,7 @@ import CategoriesContenu from "../components/CategoriesContenu";
 import TablesContenu from "../components/TablesContenu";
 import LieuxContenu from "../components/LieuxContenu";
 import EmployesContenu from "../components/EmployesContenu";
+import CommandesContenu from "../components/CommandesContenu";
 import ParametresContenu from "../components/ParametresContenu";
 import { useDashboardSocket } from "../hooks/useDashboardSocket";
 import { jouerNotification } from "../utils/son";
@@ -761,6 +762,9 @@ export default function AdminDashboard() {
 
     case 6:
       return <EmployesContenu />;
+
+    case 7:
+      return <CommandesContenu />;
 
     case 9:
       return <ParametresContenu />;

@@ -124,3 +124,18 @@
 .paiement-tag-orange_money{ background:rgba(249,115,22,0.14); color:#c2570f; }
 .paiement-tag-pi_mix{ background:rgba(139,92,246,0.14); color:#6d28d9; }
 .recent-reference{ font-size:10px; color:var(--ink-soft); }
+
+/* Page Commandes (admin) — liste actionnable */
+.cmd-liste{ display:flex; flex-direction:column; gap:12px; }
+.cmd-carte{ background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:14px 16px; }
+.cmd-carte-tete{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.cmd-num{ font-weight:800; }
+.cmd-table{ color:var(--ink-soft); font-weight:600; font-size:13px; }
+.cmd-total{ margin-left:auto; font-weight:800; color:var(--red-dim); }
+.cmd-articles{ margin:8px 0 12px; font-size:13.5px; color:var(--ink); }
+.cmd-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+.cmd-btn{ border:none; border-radius:9px; padding:9px 14px; font-weight:700; font-size:13px; color:#fff; cursor:pointer; }
+.cmd-btn:disabled{ opacity:0.55; cursor:not-allowed; }
+.cmd-btn-vert{ background:var(--green); }
+.cmd-btn-rouge{ background:var(--red); }
+.cmd-btn-recu{ background:#8A5A1E; }
