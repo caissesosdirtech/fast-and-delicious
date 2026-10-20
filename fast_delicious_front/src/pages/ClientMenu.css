@@ -371,12 +371,12 @@
 /* ---------- Miniature du plat + zoom + overlay détails ---------- */
 .plat-thumb{
   width:100%; height:130px; border-radius:12px; overflow:hidden;
-  background:linear-gradient(135deg, var(--gold), var(--red));
+  background:var(--cream-2);
   display:flex; align-items:center; justify-content:center;
-  position:relative; cursor:default;
+  padding:8px; position:relative; cursor:default;
 }
 .plat-thumb img{
-  width:100%; height:100%; object-fit:cover; display:block;
+  width:100%; height:100%; object-fit:contain; display:block;
   transition:transform .35s ease;
 }
 .plat-thumb:hover img{ transform:scale(1.12); }
