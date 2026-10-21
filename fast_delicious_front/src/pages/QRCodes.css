@@ -46,3 +46,23 @@
   .no-print, .qr-toolbar{ display:none !important; }
   .qr-card{ box-shadow:none; page-break-inside:avoid; }
 }
+
+/* Sélecteur de site + badges lieu */
+.qr-lieu-select{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;
+  margin-bottom:18px;
+}
+.qr-lieu-select label{ font-weight:700; font-size:13.5px; color:var(--ink); }
+.qr-lieu-select select{
+  padding:9px 12px; border-radius:10px; border:1.5px solid var(--line);
+  background:var(--panel); font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer;
+}
+.qr-lieu-actif{ font-size:12.5px; color:var(--ink-soft); }
+.qr-lieu-actif strong{ color:var(--green-dim); }
+
+.qr-card-site{ border-color:var(--green); background:rgba(61,138,79,0.05); }
+.qr-sous-label{ font-size:11.5px; color:var(--green-dim); font-weight:700; margin-bottom:4px; }
+.qr-lieu-badge{
+  display:inline-block; font-size:11px; font-weight:700; color:var(--green-dim);
+  background:rgba(61,138,79,0.12); padding:2px 9px; border-radius:9px; margin-bottom:6px;
+}

@@ -1,22 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageHero from "../components/PageHero";
+import client from "../api/client";
 import "./QRCodes.css";
 
 const NOMS_PAR_DEFAUT = ["Stand 1", "Stand 2", "Stand 3", "Stand 4"];
 
-function urlPourTable(nomTable) {
-  const base = `${window.location.origin}/`;
-  return `${base}?table=${encodeURIComponent(nomTable)}`;
+// Construit l'URL que le client ouvrira : le lieu (id) et/ou la table sont pré-remplis.
+function construireUrl({ table, lieuId }) {
+  const params = new URLSearchParams();
+  if (lieuId) params.set("lieu", lieuId);
+  if (table) params.set("table", table);
+  const q = params.toString();
+  return `${window.location.origin}/${q ? "?" + q : ""}`;
 }
 
 function urlImageQRCode(contenu) {
-  // Génère l'image du QR code via une API publique gratuite (aucune dépendance à installer).
+  // Image du QR via une API publique gratuite (aucune dépendance à installer).
   return `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=10&data=${encodeURIComponent(contenu)}`;
 }
 
 export default function QRCodes() {
   const [noms, setNoms] = useState(NOMS_PAR_DEFAUT);
   const [nouveauNom, setNouveauNom] = useState("");
+  const [lieux, setLieux] = useState([]);
+  const [lieuId, setLieuId] = useState("");
+
+  useEffect(() => {
+    client.get("menu/lieux/").then((res) => setLieux(res.data)).catch(() => {});
+  }, []);
+
+  const lieuNom = lieux.find((l) => String(l.id) === String(lieuId))?.nom;
 
   function ajouterTable() {
     const nom = nouveauNom.trim();
@@ -34,8 +47,23 @@ export default function QRCodes() {
       <PageHero
         icon="🔗"
         title="QR codes par table / stand"
-        subtitle="À imprimer et coller sur chaque table — le client scanne et le numéro est déjà rempli."
+        subtitle="À imprimer et coller sur place — le client scanne et le site (et la table) sont déjà remplis."
       />
+
+      {lieux.length > 0 && (
+        <div className="qr-lieu-select no-print">
+          <label>📍 Site / Événement :</label>
+          <select value={lieuId} onChange={(e) => setLieuId(e.target.value)}>
+            <option value="">— Aucun (un seul site) —</option>
+            {lieux.map((l) => (
+              <option key={l.id} value={l.id}>{l.nom}</option>
+            ))}
+          </select>
+          {lieuNom && (
+            <span className="qr-lieu-actif">Les QR ci-dessous pointent vers <strong>{lieuNom}</strong></span>
+          )}
+        </div>
+      )}
 
       <div className="qr-toolbar">
         <input
@@ -49,14 +77,28 @@ export default function QRCodes() {
       </div>
 
       <div className="qr-grid">
-        {noms.map((nom) => (
-          <div className="qr-card" key={nom}>
-            <button className="qr-remove no-print" onClick={() => retirerTable(nom)} aria-label="Retirer">✕</button>
-            <img src={urlImageQRCode(urlPourTable(nom))} alt={`QR code ${nom}`} />
-            <div className="qr-label font-display">{nom}</div>
-            <div className="qr-url">{urlPourTable(nom)}</div>
+        {/* QR "entrée du site" : juste le lieu, sans table (pour l'accueil du site) */}
+        {lieuId && (
+          <div className="qr-card qr-card-site" key="__site__">
+            <img src={urlImageQRCode(construireUrl({ lieuId }))} alt={`QR site ${lieuNom}`} />
+            <div className="qr-label font-display">📍 {lieuNom}</div>
+            <div className="qr-sous-label">Entrée du site</div>
+            <div className="qr-url">{construireUrl({ lieuId })}</div>
           </div>
-        ))}
+        )}
+
+        {noms.map((nom) => {
+          const url = construireUrl({ table: nom, lieuId });
+          return (
+            <div className="qr-card" key={nom}>
+              <button className="qr-remove no-print" onClick={() => retirerTable(nom)} aria-label="Retirer">✕</button>
+              <img src={urlImageQRCode(url)} alt={`QR code ${nom}`} />
+              <div className="qr-label font-display">{nom}</div>
+              {lieuNom && <div className="qr-lieu-badge">📍 {lieuNom}</div>}
+              <div className="qr-url">{url}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
