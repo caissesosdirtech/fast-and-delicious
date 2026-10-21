@@ -12,6 +12,7 @@
   --cream-2: #273349;      /* pistes de barres / fonds secondaires */
   --cream2: #273349;       /* variante utilisée dans quelques hovers */
   --ink-soft: #94a3bd;     /* texte atténué (jamais un fond : surcharge sûre) */
+  --ink: #e6ebf4;          /* texte principal clair (uniquement en mode sombre) */
 
   --dash-bg: #0e1524;
   --dash-bg-2: #121b2e;
@@ -203,3 +204,35 @@
 
 /* ---------- Bouton bascule thème (variante sombre) ---------- */
 .staff-layout.theme-sombre .theme-toggle:hover{ background:rgba(255,255,255,0.08); }
+
+/* =============================================================================
+   Lisibilité en mode sombre : --ink devient clair (ci-dessus), donc on remet en
+   FONCÉ les quelques endroits où --ink servait de FOND ou de texte sur doré.
+   ============================================================================= */
+/* Boutons qui utilisaient --ink comme fond -> fond foncé lisible + texte blanc */
+.staff-layout.theme-sombre .admin-btn-ajouter,
+.staff-layout.theme-sombre .admin-modal-valider,
+.staff-layout.theme-sombre .parametres-form button,
+.staff-layout.theme-sombre .histo-voir-plus,
+.staff-layout.theme-sombre .ticket-modal-imprimer{
+  background:#2f3f5c; color:#fff;
+}
+.staff-layout.theme-sombre .admin-btn-ajouter:hover,
+.staff-layout.theme-sombre .admin-modal-valider:hover,
+.staff-layout.theme-sombre .parametres-form button:hover,
+.staff-layout.theme-sombre .histo-voir-plus:hover,
+.staff-layout.theme-sombre .ticket-modal-imprimer:hover{
+  background:#3a4c6e;
+}
+/* Texte foncé conservé sur les pastilles dorées (avatar, rang top plats) */
+.staff-layout.theme-sombre .staff-avatar,
+.staff-layout.theme-sombre .top-plat-rang{ color:#17202f; }
+
+/* Champs de formulaire des sous-écrans (Produits, Catégories, Paramètres…) */
+.staff-layout.theme-sombre input,
+.staff-layout.theme-sombre select,
+.staff-layout.theme-sombre textarea{
+  background:#121b2e; color:var(--dash-text); border-color:var(--dash-border);
+}
+.staff-layout.theme-sombre input::placeholder,
+.staff-layout.theme-sombre textarea::placeholder{ color:#7e8ba6; }
