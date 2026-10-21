@@ -72,8 +72,7 @@ export default function TicketModal({ commande, onFermer }) {
 
           <div className="ticket-modal-footer">
             <div className="ticket-modal-merci">Merci de votre visite 🙏</div>
-            <div className="ticket-modal-infos">📍 Tour de l'Œuf — Dakar</div>
-            <div className="ticket-modal-infos">📞 +221 76 127 07 66 · ✉️ cissemadamel86@gmail.com</div>
+            <div className="ticket-modal-infos">📞 +221 76 127 07 66</div>
             <div className="ticket-modal-infos ticket-modal-event">JOJ Dakar 2026</div>
           </div>
         </div>
