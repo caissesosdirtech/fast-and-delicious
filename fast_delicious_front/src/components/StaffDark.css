@@ -1,11 +1,11 @@
 /* =============================================================================
    Thème sombre & pro pour les tableaux de bord staff (admin + caissière).
-   Tout est limité à .staff-layout : le menu client et le reste du site ne sont
+   Tout est limité à .staff-layout.theme-sombre : le menu client et le reste du site ne sont
    pas touchés. On surcharge quelques variables sûres (jamais --ink, qui sert
    aussi de fond), puis on ajuste les surfaces à fond blanc en dur et les textes.
    ============================================================================= */
 
-.staff-layout {
+.staff-layout.theme-sombre {
   /* Palette sombre (navy pro) — surcharge locale, sans effet hors du dashboard */
   --panel: #1a2437;        /* surface des cartes (était blanc) */
   --line: #2b3a54;         /* bordures */
@@ -25,169 +25,181 @@
 }
 
 /* ---------- Coque : barre latérale + topbar ---------- */
-.staff-layout .staff-sidebar {
+.staff-layout.theme-sombre .staff-sidebar {
   background: linear-gradient(180deg, #121b2e, #0e1524);
   border-right: 1px solid var(--dash-border);
 }
-.staff-layout .staff-sidebar-item { color: #9aa7bd; }
-.staff-layout .staff-sidebar-item:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
-.staff-layout .staff-sidebar-item.actif {
+.staff-layout.theme-sombre .staff-sidebar-item { color: #9aa7bd; }
+.staff-layout.theme-sombre .staff-sidebar-item:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+.staff-layout.theme-sombre .staff-sidebar-item.actif {
   background: rgba(232, 166, 59, 0.16);
   border-left-color: var(--gold);
   color: var(--gold);
 }
-.staff-layout .staff-sidebar-deconnexion { border-top-color: #243149; color: #9aa7bd; }
+.staff-layout.theme-sombre .staff-sidebar-deconnexion { border-top-color: #243149; color: #9aa7bd; }
 
-.staff-layout .staff-topbar {
+.staff-layout.theme-sombre .staff-topbar {
   background: var(--dash-bg-2);
   border-bottom: 1px solid var(--dash-border);
 }
-.staff-layout .staff-topbar h2 { color: var(--dash-text); }
-.staff-layout .staff-topbar-user span { color: var(--dash-text); }
-.staff-layout .staff-topbar-user:hover { background: rgba(255, 255, 255, 0.06); }
-.staff-layout .staff-user-menu { background: #1a2437; border-color: var(--dash-border); }
-.staff-layout .staff-user-menu button { color: var(--dash-text); }
-.staff-layout .staff-user-menu button:hover { background: #202c42; }
+.staff-layout.theme-sombre .staff-topbar h2 { color: var(--dash-text); }
+.staff-layout.theme-sombre .staff-topbar-user span { color: var(--dash-text); }
+.staff-layout.theme-sombre .staff-topbar-user:hover { background: rgba(255, 255, 255, 0.06); }
+.staff-layout.theme-sombre .staff-user-menu { background: #1a2437; border-color: var(--dash-border); }
+.staff-layout.theme-sombre .staff-user-menu button { color: var(--dash-text); }
+.staff-layout.theme-sombre .staff-user-menu button:hover { background: #202c42; }
 
-.staff-layout .staff-contenu { color: var(--dash-text); }
+.staff-layout.theme-sombre .staff-contenu { color: var(--dash-text); }
 
 /* ---------- Titres & textes ---------- */
-.staff-layout .section-titre,
-.staff-layout .admin-panel h3,
-.staff-layout .detail-gauche h4,
-.staff-layout .kpi-value,
-.staff-layout .kpi-valeur,
-.staff-layout .cmd-articles,
-.staff-layout .stat-statut strong,
-.staff-layout .detail-total,
-.staff-layout .empty-state-title,
-.staff-layout .liste-simple-id,
-.staff-layout .top-plat-name { color: var(--dash-text); }
+.staff-layout.theme-sombre .section-titre,
+.staff-layout.theme-sombre .admin-panel h3,
+.staff-layout.theme-sombre .detail-gauche h4,
+.staff-layout.theme-sombre .kpi-value,
+.staff-layout.theme-sombre .kpi-valeur,
+.staff-layout.theme-sombre .cmd-articles,
+.staff-layout.theme-sombre .stat-statut strong,
+.staff-layout.theme-sombre .detail-total,
+.staff-layout.theme-sombre .empty-state-title,
+.staff-layout.theme-sombre .liste-simple-id,
+.staff-layout.theme-sombre .top-plat-name { color: var(--dash-text); }
 
-.staff-layout .chargement-texte { color: var(--dash-text); }
+.staff-layout.theme-sombre .chargement-texte { color: var(--dash-text); }
 
 /* ---------- Cartes génériques (surfaces à fond blanc en dur) ---------- */
-.staff-layout .cmd-carte,
-.staff-layout .resume-row,
-.staff-layout .histo-row,
-.staff-layout .stat-statut,
-.staff-layout .top-plat {
+.staff-layout.theme-sombre .cmd-carte,
+.staff-layout.theme-sombre .resume-row,
+.staff-layout.theme-sombre .histo-row,
+.staff-layout.theme-sombre .stat-statut,
+.staff-layout.theme-sombre .top-plat {
   background: var(--dash-card);
   border-color: var(--dash-border);
 }
 
 /* ---------- KPI ---------- */
-.staff-layout .kpi-card {
+.staff-layout.theme-sombre .kpi-card {
   background: var(--dash-card);
   border-color: var(--dash-border);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.staff-layout .kpi-card:hover {
+.staff-layout.theme-sombre .kpi-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.7);
   border-color: var(--gold);
 }
 /* La carte "accent" devient une vitrine dorée qui ressort */
-.staff-layout .kpi-card.kpi-accent {
+.staff-layout.theme-sombre .kpi-card.kpi-accent {
   background: linear-gradient(135deg, #2a3a1e, #1d2b12);
   border-color: rgba(232, 166, 59, 0.5);
 }
-.staff-layout .kpi-card.kpi-accent .kpi-value { color: var(--gold); }
-.staff-layout .kpi-card.kpi-accent .kpi-label { color: #d7c9a6; }
+.staff-layout.theme-sombre .kpi-card.kpi-accent .kpi-value { color: var(--gold); }
+.staff-layout.theme-sombre .kpi-card.kpi-accent .kpi-label { color: #d7c9a6; }
 
 /* ---------- Panneaux ---------- */
-.staff-layout .admin-panel {
+.staff-layout.theme-sombre .admin-panel {
   background: var(--dash-card);
   border-color: var(--dash-border);
   box-shadow: 0 10px 26px -20px rgba(0, 0, 0, 0.8);
 }
-.staff-layout .historique-bandeau {
+.staff-layout.theme-sombre .historique-bandeau {
   background: rgba(232, 166, 59, 0.08);
   border-color: rgba(232, 166, 59, 0.25);
   color: var(--dash-text);
 }
 
 /* ---------- Barres de statut / top plats ---------- */
-.staff-layout .statut-track,
-.staff-layout .top-plat-track { background: #0f1828; }
-.staff-layout .statut-count { color: var(--dash-text); }
+.staff-layout.theme-sombre .statut-track,
+.staff-layout.theme-sombre .top-plat-track { background: #0f1828; }
+.staff-layout.theme-sombre .statut-count { color: var(--dash-text); }
 
 /* ---------- Tableaux (admin "recent" + caisse) ---------- */
-.staff-layout .caisse-table-wrap {
+.staff-layout.theme-sombre .caisse-table-wrap {
   background: var(--dash-card);
   border-color: var(--dash-border);
 }
-.staff-layout .caisse-table th { color: #9aa7bd; border-bottom-color: var(--dash-border); }
-.staff-layout .caisse-table td { border-bottom-color: var(--dash-border); }
-.staff-layout .caisse-table tbody tr:hover { background: #202c42; }
-.staff-layout .caisse-table tr.ligne-selectionnee { background: rgba(232, 166, 59, 0.14); }
-.staff-layout .recent-head { color: #9aa7bd; border-bottom-color: var(--dash-border); }
-.staff-layout .recent-row { border-bottom-color: var(--dash-border); }
-.staff-layout .recent-row-cliquable:hover { background: #202c42; }
+.staff-layout.theme-sombre .caisse-table th { color: #9aa7bd; border-bottom-color: var(--dash-border); }
+.staff-layout.theme-sombre .caisse-table td { border-bottom-color: var(--dash-border); }
+.staff-layout.theme-sombre .caisse-table tbody tr:hover { background: #202c42; }
+.staff-layout.theme-sombre .caisse-table tr.ligne-selectionnee { background: rgba(232, 166, 59, 0.14); }
+.staff-layout.theme-sombre .recent-head { color: #9aa7bd; border-bottom-color: var(--dash-border); }
+.staff-layout.theme-sombre .recent-row { border-bottom-color: var(--dash-border); }
+.staff-layout.theme-sombre .recent-row-cliquable:hover { background: #202c42; }
 
 /* ---------- Détail commande (caisse) ---------- */
-.staff-layout .detail-commande {
+.staff-layout.theme-sombre .detail-commande {
   background: var(--dash-card);
   border: 1.5px solid var(--dash-border);
   border-radius: 14px;
   padding: 16px;
 }
-.staff-layout .detail-divider { border-top-color: var(--dash-border); }
+.staff-layout.theme-sombre .detail-divider { border-top-color: var(--dash-border); }
 
 /* ---------- Liste simple (paiements / historique caisse) ---------- */
-.staff-layout .liste-simple-item {
+.staff-layout.theme-sombre .liste-simple-item {
   background: var(--dash-card);
   border-color: var(--dash-border);
 }
 
 /* ---------- EmptyState ---------- */
-.staff-layout .empty-state-icon { background: #0f1828; color: #9aa7bd; }
+.staff-layout.theme-sombre .empty-state-icon { background: #0f1828; color: #9aa7bd; }
 
 /* ---------- Champs & boutons neutres de la barre d'outils ---------- */
-.staff-layout .lieu-select,
-.staff-layout .date-select,
-.staff-layout .refresh-btn {
+.staff-layout.theme-sombre .lieu-select,
+.staff-layout.theme-sombre .date-select,
+.staff-layout.theme-sombre .refresh-btn {
   background: var(--dash-card);
   border-color: var(--dash-border);
   color: var(--dash-text);
 }
-.staff-layout .refresh-btn:hover:not(:disabled) { background: #202c42; border-color: var(--gold); }
+.staff-layout.theme-sombre .refresh-btn:hover:not(:disabled) { background: #202c42; border-color: var(--gold); }
 
 /* ---------- Effets au survol (dynamisme) ---------- */
-.staff-layout .cmd-carte,
-.staff-layout .histo-row,
-.staff-layout .resume-row,
-.staff-layout .stat-statut,
-.staff-layout .top-plat,
-.staff-layout .liste-simple-item {
+.staff-layout.theme-sombre .cmd-carte,
+.staff-layout.theme-sombre .histo-row,
+.staff-layout.theme-sombre .resume-row,
+.staff-layout.theme-sombre .stat-statut,
+.staff-layout.theme-sombre .top-plat,
+.staff-layout.theme-sombre .liste-simple-item {
   transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
 }
-.staff-layout .cmd-carte:hover,
-.staff-layout .histo-row:hover,
-.staff-layout .resume-row:hover,
-.staff-layout .stat-statut:hover,
-.staff-layout .top-plat:hover,
-.staff-layout .liste-simple-item:hover {
+.staff-layout.theme-sombre .cmd-carte:hover,
+.staff-layout.theme-sombre .histo-row:hover,
+.staff-layout.theme-sombre .resume-row:hover,
+.staff-layout.theme-sombre .stat-statut:hover,
+.staff-layout.theme-sombre .top-plat:hover,
+.staff-layout.theme-sombre .liste-simple-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 24px -16px rgba(0, 0, 0, 0.8);
   border-color: var(--gold);
 }
-.staff-layout .cmd-btn,
-.staff-layout .detail-btn,
-.staff-layout .histo-voir-plus,
-.staff-layout .icone-action {
+.staff-layout.theme-sombre .cmd-btn,
+.staff-layout.theme-sombre .detail-btn,
+.staff-layout.theme-sombre .histo-voir-plus,
+.staff-layout.theme-sombre .icone-action {
   transition: transform .14s ease, box-shadow .14s ease, filter .14s ease;
 }
-.staff-layout .cmd-btn:hover:not(:disabled),
-.staff-layout .detail-btn:hover:not(:disabled),
-.staff-layout .histo-voir-plus:hover,
-.staff-layout .icone-action:hover:not(:disabled) {
+.staff-layout.theme-sombre .cmd-btn:hover:not(:disabled),
+.staff-layout.theme-sombre .detail-btn:hover:not(:disabled),
+.staff-layout.theme-sombre .histo-voir-plus:hover,
+.staff-layout.theme-sombre .icone-action:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 8px 16px -8px rgba(0, 0, 0, 0.7);
   filter: brightness(1.08);
 }
-.staff-layout .chart7-bar { transition: filter .15s ease, transform .15s ease; transform-origin: bottom; }
-.staff-layout .chart7-col:hover .chart7-bar { filter: brightness(1.15); transform: scaleX(1.06); }
+.staff-layout.theme-sombre .chart7-bar { transition: filter .15s ease, transform .15s ease; transform-origin: bottom; }
+.staff-layout.theme-sombre .chart7-col:hover .chart7-bar { filter: brightness(1.15); transform: scaleX(1.06); }
 
 /* Les cartes KPI du résumé/stat apparaissent avec un léger relief au survol aussi */
-.staff-layout .kpi-value { transition: color .2s ease; }
+.staff-layout.theme-sombre .kpi-value { transition: color .2s ease; }
+
+/* ---------- Cloche de notifications (variante sombre) ---------- */
+.staff-layout.theme-sombre .cloche-btn:hover{ background:rgba(255,255,255,0.08); }
+.staff-layout.theme-sombre .cloche-badge{ box-shadow:0 0 0 2px var(--dash-bg-2); }
+.staff-layout.theme-sombre .cloche-menu{ background:#1a2437; border-color:var(--dash-border); box-shadow:0 16px 36px -12px rgba(0,0,0,0.7); }
+.staff-layout.theme-sombre .cloche-menu-tete{ background:#1a2437; border-bottom-color:var(--dash-border); color:var(--dash-text); }
+.staff-layout.theme-sombre .cloche-item{ border-bottom-color:var(--dash-border); }
+.staff-layout.theme-sombre .cloche-item:hover{ background:#202c42; }
+.staff-layout.theme-sombre .cloche-item-txt strong{ color:var(--dash-text); }
+
+/* ---------- Bouton bascule thème (variante sombre) ---------- */
+.staff-layout.theme-sombre .theme-toggle:hover{ background:rgba(255,255,255,0.08); }

@@ -67,3 +67,30 @@
   .staff-sidebar{ display:none; }
   .staff-topbar h2{ font-size:14px; }
 }
+
+/* ---------- Cloche de notifications ---------- */
+.staff-topbar-droite{ display:flex; align-items:center; gap:6px; }
+.cloche-wrap{ position:relative; }
+.cloche-btn{ position:relative; background:none; border:none; font-size:18px; line-height:1; cursor:pointer; padding:7px 9px; border-radius:9px; transition:background .15s ease; }
+.cloche-btn:hover{ background:rgba(0,0,0,0.06); }
+.cloche-btn.sonne{ animation:cloche-balance 1s ease infinite; }
+@keyframes cloche-balance{ 0%,60%,100%{ transform:rotate(0); } 70%{ transform:rotate(12deg); } 80%{ transform:rotate(-10deg); } 90%{ transform:rotate(6deg); } }
+.cloche-badge{ position:absolute; top:1px; right:2px; background:var(--red); color:#fff; font-size:10px; font-weight:800; min-width:16px; height:16px; padding:0 4px; border-radius:9px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 2px var(--panel); }
+.cloche-overlay{ position:fixed; inset:0; z-index:19; }
+.cloche-menu{ position:absolute; top:42px; right:0; width:300px; max-height:400px; overflow-y:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:0 14px 34px -12px rgba(0,0,0,0.35); z-index:20; }
+.cloche-menu-tete{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line); font-weight:800; font-size:13px; position:sticky; top:0; background:var(--panel); }
+.cloche-vider{ background:none; border:none; color:var(--ink-soft); font-size:11px; font-weight:700; cursor:pointer; }
+.cloche-vide{ padding:26px 14px; text-align:center; color:var(--ink-soft); font-size:12.5px; }
+.cloche-liste{ display:flex; flex-direction:column; }
+.cloche-item{ display:flex; align-items:center; gap:10px; padding:11px 14px; width:100%; text-align:left; background:none; border:none; border-bottom:1px solid var(--line); cursor:pointer; transition:background .12s ease; }
+.cloche-item:last-child{ border-bottom:none; }
+.cloche-item:hover{ background:var(--cream-2); }
+.cloche-item-icone{ font-size:16px; }
+.cloche-item-txt{ flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+.cloche-item-txt strong{ font-size:12.5px; }
+.cloche-item-sub{ font-size:11px; color:var(--ink-soft); }
+.cloche-item-heure{ font-size:10.5px; color:var(--ink-soft); white-space:nowrap; }
+
+/* ---------- Bouton bascule clair/sombre ---------- */
+.theme-toggle{ background:none; border:none; font-size:17px; line-height:1; cursor:pointer; padding:7px 9px; border-radius:9px; transition:background .15s ease; }
+.theme-toggle:hover{ background:rgba(0,0,0,0.06); }
