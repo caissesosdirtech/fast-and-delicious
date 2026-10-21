@@ -14,7 +14,7 @@ SECRET_KEY = os.environ.get(
     "SECRET_KEY", "django-insecure-i!pvs6uh-)yf0$x7*=jn@ymb#t)0qi6&jv_k0$1473wxo7tb7m"
 )
 
-# DEBUG=True par défaut en local ; sur Railway, on définit DEBUG=False dans les variables d'environnement.
+# DEBUG=True par défaut en local ; en production, on définit DEBUG=False dans les variables d'environnement.
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
@@ -44,7 +44,7 @@ AUTH_USER_MODEL = 'accounts.Utilisateur'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Indispensable pour les fichiers statiques sur Render
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -76,8 +76,8 @@ ASGI_APPLICATION = 'backend.asgi.application'
 
 
 # Base de données.
-# En local (pas de DATABASE_URL défini) : SQLite, comme avant.
-# Sur Railway (DATABASE_URL fourni automatiquement par l'addon Postgres) : PostgreSQL.
+# En local : SQLite.
+# Sur Render / Production : PostgreSQL via DATABASE_URL.
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     DATABASES = {
@@ -93,8 +93,6 @@ else:
 
 
 # Channels : couche de communication temps réel.
-# En local (pas de REDIS_URL défini) : InMemoryChannelLayer (un seul process, suffisant en dev).
-# En prod (REDIS_URL fourni par l'addon Redis Railway) : vrai channel layer partagé entre workers.
 REDIS_URL = os.environ.get("REDIS_URL")
 if REDIS_URL:
     CHANNEL_LAYERS = {
@@ -157,18 +155,23 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
-# --- CORS ---
-# En local : le frontend Vite tourne sur localhost:5173.
-# En prod : ajoute l'URL de ton frontend déployé via la variable d'environnement FRONTEND_URL.
+# --- CORS & Sécurité ---
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
 _frontend_url = os.environ.get("FRONTEND_URL")
 if _frontend_url:
     CORS_ALLOWED_ORIGINS.append(_frontend_url)
+
 CORS_ALLOW_CREDENTIALS = True
 
-# Nécessaire derrière le proxy HTTPS de Railway, pour que Django sache que la requête est bien en HTTPS.
+# Prise en charge automatique des domaines Render pour le HTTPS et les requêtes sécurisées
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CSRF_TRUSTED_ORIGINS = [_frontend_url] if _frontend_url else []
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.onrender.com",
+]
+if _frontend_url:
+    CSRF_TRUSTED_ORIGINS.append(_frontend_url)
