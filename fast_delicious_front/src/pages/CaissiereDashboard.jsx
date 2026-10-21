@@ -232,7 +232,10 @@ export default function CaissiereDashboard() {
                     onClick={() => setSelectionnee(cmd)}
                   >
                     <td>#{cmd.id}</td>
-                    <td>{cmd.mode_commande === "LIVRAISON" ? "🛵" : (cmd.numero_table || "—")}</td>
+                    <td>
+                      {cmd.mode_commande === "LIVRAISON" ? "🛵" : (cmd.numero_table || "—")}
+                      {cmd.lieu_nom && <div className="caisse-lieu">📍 {cmd.lieu_nom}</div>}
+                    </td>
                     <td>{new Date(cmd.date_creation).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</td>
                     <td>{Number(cmd.total).toLocaleString("fr-FR")} F</td>
                     <td>{badgeStatut(cmd.statut)}</td>

@@ -30,6 +30,10 @@ export default function TicketModal({ commande, onFermer }) {
             {new Date(commande.date_creation).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
           </div>
 
+          {commande.lieu_nom && (
+            <div className="ticket-modal-sub">📍 {commande.lieu_nom}</div>
+          )}
+
           {commande.mode_commande === "LIVRAISON" && (
             <div className="ticket-modal-sub">📍 {commande.adresse_livraison} · 📞 {commande.telephone_client}</div>
           )}

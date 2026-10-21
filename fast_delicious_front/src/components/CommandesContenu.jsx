@@ -106,6 +106,7 @@ export default function CommandesContenu() {
                       ? "🛵 Livraison"
                       : (cmd.numero_table ? `Table ${cmd.numero_table}` : "Sur place")}
                   </span>
+                  {cmd.lieu_nom && <span className="cmd-lieu">📍 {cmd.lieu_nom}</span>}
                   <span className={`recent-badge statut-${COULEUR_STATUT[cmd.statut]}`}>
                     {LABELS_STATUT[cmd.statut] || cmd.statut}
                   </span>

@@ -91,3 +91,6 @@
   background:var(--gold); color:var(--ink); border-radius:50%; font-weight:800; font-size:13px; }
 .top-plat-nom{ flex:1; font-weight:600; }
 .top-plat strong{ font-size:18px; font-weight:800; color:var(--red-dim); }
+
+/* Site/lieu sous le numéro de table (multi-événements) */
+.caisse-lieu{ font-size:10.5px; font-weight:700; color:#8a6214; margin-top:2px; }

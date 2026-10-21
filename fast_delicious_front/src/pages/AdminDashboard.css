@@ -167,3 +167,7 @@
 .histo-voir-plus{ margin:14px auto 0; display:block; background:var(--ink); color:var(--cream); border:none;
   border-radius:10px; padding:10px 22px; font-weight:700; font-size:13px; cursor:pointer; }
 .histo-voir-plus:hover{ background:var(--red); }
+
+/* Badge "site/lieu" sur une commande (multi-événements) */
+.cmd-lieu{ font-size:11px; font-weight:700; color:#8a6214; background:rgba(232,166,59,.16);
+  padding:2px 8px; border-radius:9px; }
