@@ -10,6 +10,7 @@ import TablesContenu from "../components/TablesContenu";
 import LieuxContenu from "../components/LieuxContenu";
 import EmployesContenu from "../components/EmployesContenu";
 import CommandesContenu from "../components/CommandesContenu";
+import AnimatedNumber from "../components/AnimatedNumber";
 import ParametresContenu from "../components/ParametresContenu";
 import { useDashboardSocket } from "../hooks/useDashboardSocket";
 import { jouerNotification } from "../utils/son";
@@ -438,9 +439,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="kpi-value font-display">
-              {Number(
-                stats.nombre_commandes || 0
-              ).toLocaleString("fr-FR")}
+              <AnimatedNumber value={stats.nombre_commandes || 0} />
             </div>
           </div>
 
@@ -450,9 +449,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="kpi-value font-display">
-              {Number(
-                stats.chiffre_affaires || 0
-              ).toLocaleString("fr-FR")}
+              <AnimatedNumber value={stats.chiffre_affaires || 0} />
 
               <span> FCFA</span>
             </div>
@@ -464,9 +461,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="kpi-value font-display">
-              {Number(
-                stats.panier_moyen || 0
-              ).toLocaleString("fr-FR")}
+              <AnimatedNumber value={stats.panier_moyen || 0} />
 
               <span> FCFA</span>
             </div>
@@ -798,15 +793,15 @@ export default function AdminDashboard() {
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Commandes aujourd'hui</div>
-            <div className="kpi-value font-display">{Number(stats.nombre_commandes || 0).toLocaleString("fr-FR")}</div>
+            <div className="kpi-value font-display"><AnimatedNumber value={stats.nombre_commandes || 0} /></div>
           </div>
           <div className="kpi-card kpi-accent">
             <div className="kpi-label">Chiffre d'affaires</div>
-            <div className="kpi-value font-display">{Number(stats.chiffre_affaires || 0).toLocaleString("fr-FR")}<span> FCFA</span></div>
+            <div className="kpi-value font-display"><AnimatedNumber value={stats.chiffre_affaires || 0} /><span> FCFA</span></div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Panier moyen</div>
-            <div className="kpi-value font-display">{Number(stats.panier_moyen || 0).toLocaleString("fr-FR")}<span> FCFA</span></div>
+            <div className="kpi-value font-display"><AnimatedNumber value={stats.panier_moyen || 0} /><span> FCFA</span></div>
           </div>
         </div>
 

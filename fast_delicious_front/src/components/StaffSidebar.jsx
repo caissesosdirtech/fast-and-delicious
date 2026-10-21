@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./StaffSidebar.css";
+import "./StaffDark.css";
 
 /**
  * items: [{ icone: "📊", label: "Tableau de bord" }, ...]
