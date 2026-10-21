@@ -59,10 +59,22 @@
 .ticket-modal-imprimer:hover{ background:#3a3225; }
 
 @media print {
+  /* Format petit ticket (type imprimante thermique 80 mm) au lieu d'une page A4 pleine. */
+  @page { size: 80mm auto; margin: 4mm; }
+
   .ticket-modal-fermer, .ticket-modal-imprimer{ display:none !important; }
   body *{ visibility:hidden; }
   #ticket-a-imprimer, #ticket-a-imprimer *{ visibility:visible; }
-  #ticket-a-imprimer{ position:absolute; top:0; left:0; width:100%; margin:0; color:#000; }
+
+  #ticket-a-imprimer{
+    position:absolute; top:0; left:0;
+    width:72mm; margin:0; color:#000; font-size:11px;
+  }
   .ticket-modal-overlay{ position:static !important; background:none !important; padding:0 !important; }
-  .ticket-modal{ box-shadow:none; max-height:none; max-width:100%; position:static; overflow:visible; background:#fff; }
+  .ticket-modal{
+    box-shadow:none; max-height:none; width:72mm; max-width:72mm;
+    position:static; overflow:visible; background:#fff; padding:4mm; border-radius:0;
+  }
+  .ticket-modal-titre{ font-size:14px; }
+  .ticket-modal-total{ font-size:13px; }
 }
