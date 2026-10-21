@@ -4,6 +4,16 @@ from .models import Categorie, Lieu, Plat, TableRestaurant
 from .serializers import CategorieSerializer, LieuSerializer, PlatSerializer, TableRestaurantSerializer
 
 
+class EcritureAdmin(permissions.BasePermission):
+    """Écriture réservée à l'admin : accepte le rôle métier « admin » OU un compte Django
+    staff/superuser (is_staff). Évite que l'ajout/suppression échoue silencieusement quand
+    l'admin a role='admin' mais pas is_staff."""
+
+    def has_permission(self, request, view):
+        u = request.user
+        return bool(u and u.is_authenticated and (getattr(u, "role", "") == "admin" or u.is_staff))
+
+
 class LieuViewSet(viewsets.ModelViewSet):
     """CRUD sur les lieux/événements. Lecture publique (menu client, pour choisir son site),
     écriture réservée à l'admin."""
@@ -14,7 +24,7 @@ class LieuViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
             return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
+        return [EcritureAdmin()]
 
 
 class CategorieViewSet(viewsets.ModelViewSet):
@@ -26,7 +36,7 @@ class CategorieViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
             return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
+        return [EcritureAdmin()]
 
 
 class PlatViewSet(viewsets.ModelViewSet):
@@ -37,14 +47,15 @@ class PlatViewSet(viewsets.ModelViewSet):
     serializer_class = PlatSerializer
 
     def get_queryset(self):
-        if self.request.user.is_authenticated and self.request.user.is_staff:
+        u = self.request.user
+        if u.is_authenticated and (u.is_staff or getattr(u, "role", "") == "admin"):
             return Plat.objects.all()
         return Plat.objects.filter(disponible=True)
 
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
             return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
+        return [EcritureAdmin()]
 
 
 class TableRestaurantViewSet(viewsets.ModelViewSet):
@@ -56,4 +67,4 @@ class TableRestaurantViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
             return [permissions.AllowAny()]
-        return [permissions.IsAdminUser()]
+        return [EcritureAdmin()]

@@ -21,15 +21,26 @@ export default function LieuxContenu() {
   async function ajouter() {
     const nom = nouveauNom.trim();
     if (!nom) return;
-    await client.post("menu/lieux/", { nom });
-    setNouveauNom("");
-    charger();
+    try {
+      await client.post("menu/lieux/", { nom });
+      setNouveauNom("");
+      charger();
+    } catch (e) {
+      const msg = e?.response?.status === 403
+        ? "Action réservée à l'administrateur."
+        : (e?.response?.data?.nom?.[0] || "Impossible d'ajouter ce lieu. Réessaie.");
+      window.alert(msg);
+    }
   }
 
   async function supprimer(lieu) {
     if (!window.confirm(`Supprimer "${lieu.nom}" ? Le personnel affecté à ce lieu devra être réaffecté.`)) return;
-    await client.delete(`menu/lieux/${lieu.id}/`);
-    charger();
+    try {
+      await client.delete(`menu/lieux/${lieu.id}/`);
+      charger();
+    } catch (e) {
+      window.alert(e?.response?.status === 403 ? "Action réservée à l'administrateur." : "Suppression impossible.");
+    }
   }
 
   if (chargement) return <p className="chargement-texte">Chargement...</p>;
