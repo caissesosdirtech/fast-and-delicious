@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
+import '../../config/photo_locale.dart';
 import '../../services/api_client.dart';
 import '../../models/plat.dart';
 import '../../providers/cart_provider.dart';
@@ -341,7 +342,9 @@ class _MenuScreenState extends State<MenuScreen> {
             alignment: Alignment.center,
             child: plat.imageUrl != null
                 ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network(plat.imageUrl!, width: 60, height: 60, fit: BoxFit.cover))
-                : const Text('🍱', style: TextStyle(fontSize: 24)),
+                : (photoLocalePlat(plat.nom) != null
+                    ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.asset(photoLocalePlat(plat.nom)!, width: 60, height: 60, fit: BoxFit.cover))
+                    : const Text('🍱', style: TextStyle(fontSize: 24))),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -374,8 +377,10 @@ class _MenuScreenState extends State<MenuScreen> {
             alignment: Alignment.center,
             child: plat.imageUrl != null
                 ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network(plat.imageUrl!, width: 56, height: 56, fit: BoxFit.cover))
-                : Text(_iconePourCategorie(_categories.firstWhere((c) => c.id == plat.categorieId, orElse: () => _categories.first).nom),
-                    style: const TextStyle(fontSize: 22)),
+                : (photoLocalePlat(plat.nom) != null
+                    ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.asset(photoLocalePlat(plat.nom)!, width: 56, height: 56, fit: BoxFit.cover))
+                    : Text(_iconePourCategorie(_categories.firstWhere((c) => c.id == plat.categorieId, orElse: () => _categories.first).nom),
+                        style: const TextStyle(fontSize: 22))),
           ),
           const SizedBox(width: 12),
           Expanded(
