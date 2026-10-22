@@ -19,9 +19,12 @@
 body{
   margin:0;
   min-height:100vh;
+  /* Image de fond dupliquée sur les deux côtés (répétée verticalement) et plus visible
+     sur les marges latérales ; un voile crème garde le centre lisible. */
   background:
-    linear-gradient(rgba(251,244,228,0.80), rgba(251,244,228,0.90)),
-    url('/fond-app.png') center top / min(100%, 760px) auto no-repeat fixed;
+    linear-gradient(rgba(251,244,228,0.78), rgba(251,244,228,0.88)),
+    url('/fond-app.png') left top / 320px auto repeat-y fixed,
+    url('/fond-app.png') right top / 320px auto repeat-y fixed;
   background-color:var(--cream);
   color:var(--ink);
   font-family:'Inter', sans-serif;
