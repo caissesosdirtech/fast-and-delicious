@@ -83,6 +83,12 @@ export default function ClientMenu() {
     client.get("menu/lieux/").then((res) => setLieux(res.data));
   }, []);
 
+  // En livraison à domicile, le choix du site/stand n'a pas de sens : on efface un lieu
+  // éventuellement déjà sélectionné (la liste est aussi masquée dans le rendu).
+  useEffect(() => {
+    if (modeCommande === "LIVRAISON" && lieu) setLieu("");
+  }, [modeCommande]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     client
       .get("menu/categories/")
@@ -210,7 +216,7 @@ export default function ClientMenu() {
             📞 Commander par téléphone : <span className="font-mono">+221 76 127 07 66</span>
           </a>
 
-          {lieux.length > 1 && (
+          {lieux.length > 1 && modeCommande !== "LIVRAISON" && (
             <div className="lieu-select-wrap">
               <select
                 className="lieu-select-client"
