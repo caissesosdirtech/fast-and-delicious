@@ -106,6 +106,22 @@
   border-color: var(--accent);
 }
 
+.caisse-date-input {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 9px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.caisse-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
 .caisse-evolution {
   display: flex;
   flex-direction: column;

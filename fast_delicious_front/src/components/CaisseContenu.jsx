@@ -26,24 +26,30 @@ const PERIODES = [
   },
 ];
 
+const AUJOURDHUI = new Date().toISOString().slice(0, 10);
+
 export default function CaisseContenu() {
   const [periode, setPeriode] = useState("jour");
+  const [dateJour, setDateJour] = useState(""); // "" = pas de date précise (on suit la période)
   const [stats, setStats] = useState(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState(null);
 
   useEffect(() => {
     charger();
-  }, [periode]);
+  }, [periode, dateJour]);
 
   async function charger() {
     setChargement(true);
     setErreur(null);
 
     try {
-      const res = await client.get(
-        `admin/caisse/?periode=${periode}`
-      );
+      // Une date précise est prioritaire sur la période.
+      const url = dateJour
+        ? `admin/caisse/?date=${dateJour}`
+        : `admin/caisse/?periode=${periode}`;
+
+      const res = await client.get(url);
 
       setStats(res.data);
     } catch (error) {
@@ -117,11 +123,14 @@ export default function CaisseContenu() {
           <button
             key={p.valeur}
             className={
-              periode === p.valeur
+              !dateJour && periode === p.valeur
                 ? "caisse-periode-active"
                 : "caisse-periode-btn"
             }
-            onClick={() => setPeriode(p.valeur)}
+            onClick={() => {
+              setDateJour("");
+              setPeriode(p.valeur);
+            }}
           >
             <span>{p.icone}</span>
 
@@ -129,6 +138,26 @@ export default function CaisseContenu() {
           </button>
 
         ))}
+
+        {/* Sélecteur de date précise (comme sur mobile) */}
+        <input
+          type="date"
+          className="caisse-date-input"
+          value={dateJour}
+          max={AUJOURDHUI}
+          onChange={(e) => setDateJour(e.target.value)}
+          title="Choisir une date précise"
+        />
+
+        {dateJour && (
+          <button
+            className="caisse-periode-btn"
+            onClick={() => setDateJour("")}
+          >
+            <span>↩</span>
+            Aujourd'hui
+          </button>
+        )}
 
       </div>
 

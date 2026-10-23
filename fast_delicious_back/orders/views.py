@@ -448,6 +448,7 @@ class EtatCaisseView(APIView):
 
     def get(self, request):
         periode = request.query_params.get("periode", "jour")
+        date_str = request.query_params.get("date")
 
         aujourd_hui = timezone.localdate()
 
@@ -455,7 +456,21 @@ class EtatCaisseView(APIView):
         # DÉTERMINATION DE LA PÉRIODE
         # ============================================================
 
-        if periode == "jour":
+        # Date précise demandée (?date=YYYY-MM-DD) : on affiche ce jour-là,
+        # prioritaire sur la période.
+        if date_str:
+            try:
+                jour = datetime.strptime(date_str, "%Y-%m-%d").date()
+            except ValueError:
+                return Response(
+                    {"detail": "Format de date invalide. Utilisez YYYY-MM-DD."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            date_debut = jour
+            date_fin = jour
+            libelle_periode = f"Ventes du {jour.strftime('%d/%m/%Y')}"
+
+        elif periode == "jour":
 
             date_debut = aujourd_hui
             date_fin = aujourd_hui
