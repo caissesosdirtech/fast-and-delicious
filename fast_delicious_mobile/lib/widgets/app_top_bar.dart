@@ -5,6 +5,7 @@ import '../config/theme.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import 'cart_drawer.dart';
+import 'staff_scaffold.dart' show confirmerDeconnexion;
 
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({super.key});
@@ -19,15 +20,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       titleSpacing: 16,
-      title: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset('assets/logo-fast-delicious.jpg', height: 38, width: 38, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, color: AppColors.red)),
-          ),
-        ],
-      ),
+      title: const Text('Menu', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.ink, fontSize: 18)),
       actions: [
         if (auth.utilisateur == null)
           Stack(
@@ -60,6 +53,8 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
           IconButton(
             icon: const Icon(Icons.logout, size: 18),
             onPressed: () async {
+              if (!await confirmerDeconnexion(context)) return;
+              if (!context.mounted) return;
               await auth.deconnexion();
               if (context.mounted) Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false);
             },

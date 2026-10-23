@@ -5,9 +5,11 @@ import '../config/theme.dart';
 import '../services/api_client.dart';
 import '../widgets/empty_state.dart';
 
-const _rolesDisponibles = ['caissiere', 'cuisine', 'livreur', 'admin'];
+const _rolesDisponibles = ['caissiere', 'admin'];
 const _labelsRole = {
-  'caissiere': 'Caissière', 'cuisine': 'Cuisinier', 'livreur': 'Livreur', 'admin': 'Admin',
+  'caissiere': 'Caissière', 'admin': 'Admin',
+  // Rôles historiques encore possibles côté serveur, gardés pour l'affichage.
+  'cuisine': 'Cuisinier', 'livreur': 'Livreur',
 };
 
 class EmployesContenu extends StatefulWidget {

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
@@ -378,8 +378,17 @@ class StatistiquesAdminView(APIView):
         if request.user.lieu_id and request.user.role != "admin":
             lieu_id = request.user.lieu_id  # le staff affecté à un lieu ne voit que le sien
 
-        aujourdhui = timezone.now().date()
-        commandes_jour = Commande.objects.filter(date_creation__date=aujourdhui)
+        aujourdhui = timezone.localdate()
+        # Date demandée (?date=YYYY-MM-DD), sinon aujourd'hui.
+        date_str = request.query_params.get("date")
+        if date_str:
+            try:
+                jour_ref = datetime.strptime(date_str, "%Y-%m-%d").date()
+            except ValueError:
+                return Response({"detail": "Format de date invalide. Utilisez YYYY-MM-DD."}, status=400)
+        else:
+            jour_ref = aujourdhui
+        commandes_jour = Commande.objects.filter(date_creation__date=jour_ref)
         if lieu_id:
             commandes_jour = commandes_jour.filter(lieu_id=lieu_id)
         commandes_valides = commandes_jour.exclude(statut=Commande.Statut.ANNULEE).prefetch_related("lignes__plat")
@@ -407,7 +416,7 @@ class StatistiquesAdminView(APIView):
         # Tendance des ventes sur les 7 derniers jours (dont aujourd'hui), pour le graphique admin.
         ventes_7_jours = []
         for i in range(6, -1, -1):
-            jour = aujourdhui - timezone.timedelta(days=i)
+            jour = jour_ref - timedelta(days=i)
             commandes_du_jour = Commande.objects.filter(date_creation__date=jour).exclude(statut=Commande.Statut.ANNULEE)
             if lieu_id:
                 commandes_du_jour = commandes_du_jour.filter(lieu_id=lieu_id)
@@ -415,7 +424,8 @@ class StatistiquesAdminView(APIView):
             ventes_7_jours.append({"date": jour.isoformat(), "total": total_jour})
 
         return Response({
-            "date": aujourdhui.isoformat(),
+            "date": jour_ref.isoformat(),
+            "est_aujourdhui": jour_ref == aujourdhui,
             "lieu_id": int(lieu_id) if lieu_id else None,
             "nombre_commandes": commandes_jour.count(),
             "chiffre_affaires": chiffre_affaires,

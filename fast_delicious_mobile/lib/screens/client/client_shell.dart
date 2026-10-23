@@ -48,18 +48,20 @@ class _ClientShellState extends State<ClientShell> {
       appBar: _ongletActif == 0
           ? null
           : AppBar(
-              title: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(7),
-                    child: Image.asset('assets/logo-fast-delicious.jpg', height: 32, width: 32, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, color: AppColors.red)),
-                  ),
-                ],
-              ),
+              title: const Text('Menu', style: TextStyle(fontWeight: FontWeight.bold)),
               actions: [const SizedBox(width: 8)],
             ),
-      body: SafeArea(top: _ongletActif == 0, bottom: false, child: IndexedStack(index: _ongletActif, children: pages)),
+      body: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.cream,
+          image: DecorationImage(
+            image: AssetImage('assets/fond-app.png'),
+            fit: BoxFit.cover,
+            opacity: 0.10,
+          ),
+        ),
+        child: SafeArea(top: _ongletActif == 0, bottom: false, child: IndexedStack(index: _ongletActif, children: pages)),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _ongletActif,
         onDestinationSelected: (index) {

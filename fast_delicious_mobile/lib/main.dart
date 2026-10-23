@@ -9,8 +9,6 @@ import 'screens/client/client_shell.dart';
 import 'screens/client/suivi_screen.dart';
 import 'screens/staff/login_screen.dart';
 import 'screens/staff/caisse_screen.dart';
-import 'screens/staff/cuisine_screen.dart';
-import 'screens/staff/livraison_screen.dart';
 import 'screens/staff/admin_screen.dart';
 import 'widgets/route_guard.dart';
 
@@ -31,7 +29,7 @@ class FastDeliciousApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: MaterialApp(
-        title: 'Fast & Delicious',
+        title: 'Menu',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         initialRoute: '/',
@@ -51,16 +49,6 @@ class FastDeliciousApp extends StatelessWidget {
           if (settings.name == '/caisse') {
             return MaterialPageRoute(
               builder: (_) => const RouteGuard(rolesAutorises: ['caissiere', 'admin'], child: CaisseScreen()),
-            );
-          }
-          if (settings.name == '/cuisine') {
-            return MaterialPageRoute(
-              builder: (_) => const RouteGuard(rolesAutorises: ['cuisine', 'admin'], child: CuisineScreen()),
-            );
-          }
-          if (settings.name == '/livraison') {
-            return MaterialPageRoute(
-              builder: (_) => const RouteGuard(rolesAutorises: ['livreur', 'admin'], child: LivraisonScreen()),
             );
           }
           if (settings.name == '/admin') {

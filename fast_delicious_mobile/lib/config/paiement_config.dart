@@ -3,7 +3,7 @@
 /// doivent être ajoutées dans le dossier assets/ et déclarées dans pubspec.yaml.
 class PaiementConfig {
   static const String codeMarchandOrangeMoney = "603097";
-  static const String nomBeneficiaire = "Fast & Delicious — Kermesse des Martyrs de l'Ouganda";
+  static const String nomBeneficiaire = "JOJ Dakar 2026";
 
   static const Map<String, String> qrParMode = {
     "PI_MIX": "assets/qr-pimix-yas.jpeg",

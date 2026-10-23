@@ -26,16 +26,15 @@ class _LoginScreenState extends State<LoginScreen> {
       final profil = await auth.connexion(_usernameCtrl.text.trim(), _passwordCtrl.text);
       if (!mounted) return;
 
+      // On remplace toute la pile de navigation : l'écran staff devient la racine,
+      // pour que « retour » ne renvoie pas sur la page client (ce qui donnait
+      // l'impression d'une déconnexion). La déconnexion reste explicite (bouton).
       if (profil.estAdmin) {
-        Navigator.pushReplacementNamed(context, '/admin');
+        Navigator.pushNamedAndRemoveUntil(context, '/admin', (r) => false);
       } else if (profil.estCaissiere) {
-        Navigator.pushReplacementNamed(context, '/caisse');
-      } else if (profil.estCuisine) {
-        Navigator.pushReplacementNamed(context, '/cuisine');
-      } else if (profil.estLivreur) {
-        Navigator.pushReplacementNamed(context, '/livraison');
+        Navigator.pushNamedAndRemoveUntil(context, '/caisse', (r) => false);
       } else {
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false);
       }
     } on DioException {
       setState(() => _erreur = 'Identifiant ou mot de passe incorrect.');
@@ -70,11 +69,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: BoxDecoration(color: AppColors.ink, borderRadius: BorderRadius.circular(14)),
                         child: const Icon(Icons.restaurant, color: AppColors.gold, size: 28),
                       ),
-                      const Text('Fast & Delicious',
+                      const Text('Espace staff',
                           style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: AppColors.ink)),
                       const SizedBox(height: 6),
                       const Text(
-                        "Espace réservé à l'équipe caisse, cuisine et livraison.",
+                        "Espace réservé à l'équipe (caisse & admin).",
                         style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                       ),
                       const SizedBox(height: 22),

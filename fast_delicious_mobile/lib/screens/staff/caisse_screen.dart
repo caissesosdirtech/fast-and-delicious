@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -6,6 +7,7 @@ import '../../config/theme.dart';
 import '../../services/api_client.dart';
 import '../../services/websocket_service.dart';
 import '../../services/son_service.dart';
+import '../../services/notifications_service.dart';
 import '../../models/commande.dart';
 import '../../widgets/staff_scaffold.dart';
 import '../../widgets/kpi_card.dart';
@@ -21,6 +23,16 @@ class CaisseScreen extends StatefulWidget {
 
   @override
   State<CaisseScreen> createState() => _CaisseScreenState();
+}
+
+/// Action principale d'une commande selon son statut (flux simplifié :
+/// EN_ATTENTE → Valider → VALIDEE → Prête → PRETE → Terminer → SERVIE).
+class _ActionPrincipale {
+  final String label;
+  final IconData icone;
+  final Color couleur;
+  final Future<void> Function(int) action;
+  const _ActionPrincipale(this.label, this.icone, this.couleur, this.action);
 }
 
 class _CaisseScreenState extends State<CaisseScreen> {
@@ -42,7 +54,10 @@ class _CaisseScreenState extends State<CaisseScreen> {
     _timer = Timer.periodic(const Duration(seconds: 20), (_) => _charger(silencieux: true));
     _ws.connecterDashboard('caisse', (data) {
       if (!mounted) return;
-      if (data['evenement'] == 'nouvelle_commande') SonService.jouerNotification();
+      if (data['evenement'] == 'nouvelle_commande') {
+        SonService.jouerNotification();
+        NotificationsService.instance.signalerNouvelle((data['commande_id'] as num?)?.toInt());
+      }
       _charger(silencieux: true);
       if (_rubrique == 2) _chargerPaiementsRecents();
       if (_rubrique == 3) _chargerHistoriqueRecent();
@@ -86,44 +101,80 @@ class _CaisseScreenState extends State<CaisseScreen> {
     if (mounted) setState(() => _historiqueRecent = List<Map<String, dynamic>>.from(reponse.data));
   }
 
-  Future<void> _encaisser(int id) async {
-    setState(() => _enTraitement[id] = true);
-    try {
-      await ApiClient().dio.patch('caisse/commandes/$id/encaisser/');
-      await _charger(silencieux: true);
-    } finally {
-      _enTraitement.remove(id);
+  /// Affiche un message d'erreur lisible (code HTTP + détail serveur) quand une
+  /// action échoue, au lieu de laisser le bouton bloqué sans explication.
+  void _afficherErreur(Object e) {
+    String msg = 'Action impossible. Vérifie ta connexion.';
+    if (e is DioException) {
+      final code = e.response?.statusCode;
+      final data = e.response?.data;
+      String detail = '';
+      if (data is Map && data['detail'] != null) {
+        detail = data['detail'].toString();
+      } else if (data is Map && data.isNotEmpty) {
+        detail = data.values.first.toString();
+      } else if (e.message != null) {
+        detail = e.message!;
+      }
+      msg = 'Erreur ${code ?? ''}${detail.isNotEmpty ? ' : $detail' : ''}'.trim();
+    }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppColors.red, duration: const Duration(seconds: 4)),
+      );
     }
   }
 
-  Future<void> _valider(int id) async {
+  /// Exécute une action PATCH sur une commande, en gérant l'état « en traitement »,
+  /// le rafraîchissement et l'affichage des erreurs de façon uniforme.
+  Future<void> _executerAction(int id, String chemin, {Map<String, dynamic>? corps}) async {
     setState(() => _enTraitement[id] = true);
     try {
-      await ApiClient().dio.patch('caisse/commandes/$id/valider/');
-      setState(() {
-        _fileAttente.removeWhere((c) => c.id == id);
-        if (_selectionnee?.id == id) _selectionnee = null;
-      });
+      await ApiClient().dio.patch(chemin, data: corps);
+      await _charger(silencieux: true);
+    } catch (e) {
+      _afficherErreur(e);
     } finally {
-      _enTraitement.remove(id);
+      if (mounted) {
+        setState(() => _enTraitement.remove(id));
+      } else {
+        _enTraitement.remove(id);
+      }
     }
   }
+
+  Future<void> _encaisser(int id) => _executerAction(id, 'caisse/commandes/$id/encaisser/');
+
+  Future<void> _valider(int id) => _executerAction(id, 'caisse/commandes/$id/valider/');
+
+  Future<void> _marquerPrete(int id) => _executerAction(id, 'caisse/commandes/$id/prete/');
+
+  Future<void> _terminer(int id) => _executerAction(id, 'caisse/commandes/$id/terminer/');
 
   Future<void> _annuler(int id) async {
     final motif = await demanderMotifAnnulation(context);
     if (motif == null) return; // dialogue fermé sans confirmer
+    await _executerAction(id, 'commandes/$id/annuler/', corps: {'motif': motif});
+  }
 
-    setState(() => _enTraitement[id] = true);
-    try {
-      await ApiClient().dio.patch('commandes/$id/annuler/', data: {'motif': motif});
-      setState(() {
-        _fileAttente.removeWhere((c) => c.id == id);
-        if (_selectionnee?.id == id) _selectionnee = null;
-      });
-    } finally {
-      _enTraitement.remove(id);
+  void _ouvrirRecu(Commande cmd) => ouvrirTicketDetail(context, cmd.toTicketMap());
+
+  /// Renvoie l'action principale à proposer selon le statut, ou null si la
+  /// commande est terminée / annulée (plus d'action de progression).
+  _ActionPrincipale? _actionPrincipale(String statut) {
+    switch (statut) {
+      case 'EN_ATTENTE':
+        return _ActionPrincipale('Valider', Icons.check, AppColors.green, _valider);
+      case 'VALIDEE':
+        return _ActionPrincipale('Prête', Icons.play_arrow, const Color(0xFF1D5BA8), _marquerPrete);
+      case 'PRETE':
+        return _ActionPrincipale('Terminer', Icons.done_all, AppColors.greenDim, _terminer);
+      default:
+        return null;
     }
   }
+
+  bool _estActive(String statut) => statut != 'SERVIE' && statut != 'ANNULEE';
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +193,7 @@ class _CaisseScreenState extends State<CaisseScreen> {
         if (i == 2 && _paiementsRecents == null) _chargerPaiementsRecents();
         if (i == 3 && _historiqueRecent == null) _chargerHistoriqueRecent();
       },
+      onNotificationsTap: () => setState(() => _rubrique = 0),
       contenu: RefreshIndicator(
         onRefresh: () async {
           if (_rubrique == 2) return _chargerPaiementsRecents();
@@ -199,18 +251,20 @@ class _CaisseScreenState extends State<CaisseScreen> {
           Wrap(
             spacing: 12, runSpacing: 12,
             children: [
-              SizedBox(width: largeurKpi, child: KpiCard(label: 'Commandes en attente', valeur: '${_fileAttente.length}', couleurValeur: AppColors.gold)),
-              SizedBox(width: largeurKpi, child: KpiCard(label: 'En préparation', valeur: '${commandesParStatut['EN_PREPARATION'] ?? 0}')),
+              SizedBox(width: largeurKpi, child: KpiCard(label: 'En attente', valeur: '${commandesParStatut['EN_ATTENTE'] ?? 0}', couleurValeur: AppColors.gold)),
+              SizedBox(width: largeurKpi, child: KpiCard(label: 'Validées', valeur: '${commandesParStatut['VALIDEE'] ?? 0}')),
               SizedBox(width: largeurKpi, child: KpiCard(label: 'Prêtes', valeur: '${commandesParStatut['PRETE'] ?? 0}', couleurValeur: AppColors.green)),
               SizedBox(width: largeurKpi, child: KpiCard(label: 'Commandes du jour', valeur: '${s['nombre_commandes']}')),
             ],
           ),
           const SizedBox(height: 24),
-          const Text('Commandes en attente', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text('Commandes en cours', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          const Text('Valider → Prête → Terminer', style: TextStyle(fontSize: 12, color: AppColors.inkSoft)),
           const SizedBox(height: 12),
 
           if (_fileAttente.isEmpty)
-            const EmptyState(emoji: '📥', titre: 'Aucune commande en attente')
+            const EmptyState(emoji: '📥', titre: 'Aucune commande en cours')
           else if (etroit)
             Column(children: _fileAttente.map(_carteCommandeMobile).toList())
           else
@@ -229,6 +283,7 @@ class _CaisseScreenState extends State<CaisseScreen> {
                   ],
                   rows: _fileAttente.map((cmd) {
                     final enTraitement = _enTraitement[cmd.id] == true;
+                    final ap = _actionPrincipale(cmd.statut);
                     return DataRow(
                       selected: _selectionnee?.id == cmd.id,
                       onSelectChanged: (_) => setState(() => _selectionnee = cmd),
@@ -239,10 +294,15 @@ class _CaisseScreenState extends State<CaisseScreen> {
                         DataCell(Text('${cmd.total.toStringAsFixed(0)} F')),
                         DataCell(_badgeStatut(cmd.statut)),
                         DataCell(Row(children: [
-                          _iconeAction(Icons.check, AppColors.green, 'Valider', enTraitement ? null : () => _valider(cmd.id)),
-                          const SizedBox(width: 6),
-                          _iconeAction(Icons.close, AppColors.red, 'Annuler', enTraitement ? null : () => _annuler(cmd.id)),
-                          const SizedBox(width: 6),
+                          if (ap != null)
+                            _iconeAction(ap.icone, ap.couleur, ap.label, enTraitement ? null : () => ap.action(cmd.id)),
+                          if (ap != null) const SizedBox(width: 6),
+                          if (_estActive(cmd.statut))
+                            _iconeAction(Icons.close, AppColors.red, 'Annuler', enTraitement ? null : () => _annuler(cmd.id)),
+                          if (_estActive(cmd.statut)) const SizedBox(width: 6),
+                          if (cmd.paiementConfirme || cmd.statut == 'SERVIE')
+                            _iconeAction(Icons.receipt_long, const Color(0xFF8A6D1D), 'Reçu', () => _ouvrirRecu(cmd)),
+                          if (cmd.paiementConfirme || cmd.statut == 'SERVIE') const SizedBox(width: 6),
                           _iconeAction(Icons.remove_red_eye, const Color(0xFF1D5BA8), 'Voir le détail', () => setState(() => _selectionnee = cmd)),
                         ])),
                       ],
@@ -268,6 +328,7 @@ class _CaisseScreenState extends State<CaisseScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModal) {
           final enTraitement = _enTraitement[cmd.id] == true;
+          final ap = _actionPrincipale(cmd.statut);
 
           Future<void> lancer(Future<void> Function(int) action) async {
             setModal(() {});
@@ -328,15 +389,17 @@ class _CaisseScreenState extends State<CaisseScreen> {
                       child: Text('✓ Paiement confirmé', style: TextStyle(color: AppColors.greenDim, fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
                   const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.green),
-                      onPressed: enTraitement ? null : () => lancer(_valider),
-                      child: Text(enTraitement ? '...' : 'Valider et envoyer en cuisine'),
+                  if (ap != null)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: ap.couleur),
+                        onPressed: enTraitement ? null : () => lancer(ap.action),
+                        icon: Icon(ap.icone, size: 18),
+                        label: Text(enTraitement ? '...' : ap.label),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
+                  if (ap != null) const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -348,12 +411,26 @@ class _CaisseScreenState extends State<CaisseScreen> {
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
-                      onPressed: enTraitement ? null : () => lancer(_annuler),
-                      child: Text(enTraitement ? '...' : 'Annuler la commande'),
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        _ouvrirRecu(cmd);
+                      },
+                      icon: const Icon(Icons.receipt_long, size: 18),
+                      label: const Text('Reçu de paiement'),
                     ),
                   ),
+                  if (_estActive(cmd.statut)) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
+                        onPressed: enTraitement ? null : () => lancer(_annuler),
+                        child: Text(enTraitement ? '...' : 'Annuler la commande'),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -366,6 +443,7 @@ class _CaisseScreenState extends State<CaisseScreen> {
   Widget _carteCommandeMobile(Commande cmd) {
     final enTraitement = _enTraitement[cmd.id] == true;
     final selectionnee = _selectionnee?.id == cmd.id;
+    final ap = _actionPrincipale(cmd.statut);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -391,26 +469,37 @@ class _CaisseScreenState extends State<CaisseScreen> {
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.green, padding: const EdgeInsets.symmetric(vertical: 10)),
-                  onPressed: enTraitement ? null : () => _valider(cmd.id),
-                  child: Text(enTraitement ? '...' : '✓ Valider', style: const TextStyle(fontSize: 12)),
+              if (ap != null)
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: ap.couleur, padding: const EdgeInsets.symmetric(vertical: 10)),
+                    onPressed: enTraitement ? null : () => ap.action(cmd.id),
+                    icon: Icon(ap.icone, size: 15),
+                    label: Text(enTraitement ? '...' : ap.label, style: const TextStyle(fontSize: 12)),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.red, padding: const EdgeInsets.symmetric(vertical: 10)),
-                  onPressed: enTraitement ? null : () => _annuler(cmd.id),
-                  child: Text(enTraitement ? '...' : '✕ Annuler', style: const TextStyle(fontSize: 12)),
+              if (ap != null) const SizedBox(width: 6),
+              if (_estActive(cmd.statut))
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.red, padding: const EdgeInsets.symmetric(vertical: 10)),
+                    onPressed: enTraitement ? null : () => _annuler(cmd.id),
+                    child: Text(enTraitement ? '...' : '✕ Annuler', style: const TextStyle(fontSize: 12)),
+                  ),
                 ),
-              ),
               const SizedBox(width: 6),
+              if (cmd.paiementConfirme || cmd.statut == 'SERVIE')
+                IconButton(
+                  onPressed: () => _ouvrirRecu(cmd),
+                  icon: const Icon(Icons.receipt_long, color: Color(0xFF8A6D1D)),
+                  style: IconButton.styleFrom(backgroundColor: AppColors.cream2),
+                  tooltip: 'Reçu',
+                ),
               IconButton(
                 onPressed: () => _ouvrirDetailModal(cmd),
                 icon: const Icon(Icons.remove_red_eye, color: Color(0xFF1D5BA8)),
                 style: IconButton.styleFrom(backgroundColor: AppColors.cream2),
+                tooltip: 'Détail',
               ),
             ],
           ),
@@ -439,6 +528,7 @@ class _CaisseScreenState extends State<CaisseScreen> {
 
   Widget _buildDetailCommande(Commande cmd) {
     final enTraitement = _enTraitement[cmd.id] == true;
+    final ap = _actionPrincipale(cmd.statut);
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(color: AppColors.panel, border: Border.all(color: AppColors.line, width: 1.5), borderRadius: BorderRadius.circular(14)),
@@ -491,15 +581,17 @@ class _CaisseScreenState extends State<CaisseScreen> {
           flex: 2,
           child: Column(
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.green),
-                  onPressed: enTraitement ? null : () => _valider(cmd.id),
-                  child: Text(enTraitement ? '...' : 'Valider et envoyer en cuisine'),
+              if (ap != null)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: ap.couleur),
+                    onPressed: enTraitement ? null : () => ap.action(cmd.id),
+                    icon: Icon(ap.icone, size: 18),
+                    label: Text(enTraitement ? '...' : ap.label),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+              if (ap != null) const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -511,12 +603,23 @@ class _CaisseScreenState extends State<CaisseScreen> {
               const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
-                  onPressed: enTraitement ? null : () => _annuler(cmd.id),
-                  child: Text(enTraitement ? '...' : 'Annuler la commande'),
+                child: OutlinedButton.icon(
+                  onPressed: () => _ouvrirRecu(cmd),
+                  icon: const Icon(Icons.receipt_long, size: 18),
+                  label: const Text('Reçu'),
                 ),
               ),
+              if (_estActive(cmd.statut)) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
+                    onPressed: enTraitement ? null : () => _annuler(cmd.id),
+                    child: Text(enTraitement ? '...' : 'Annuler la commande'),
+                  ),
+                ),
+              ],
             ],
           ),
         );

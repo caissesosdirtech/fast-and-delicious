@@ -16,8 +16,8 @@ String _texteTicket(Map<String, dynamic> commande) {
   final modePaiement = commande['mode_paiement'] as String? ?? 'ESPECES';
 
   final buffer = StringBuffer();
-  buffer.writeln('🍔 FAST & DELICIOUS');
-  buffer.writeln('Ticket #${commande['id']}');
+  buffer.writeln('REÇU DE PAIEMENT');
+  buffer.writeln('Reçu #${commande['id']}');
   buffer.writeln(
     commande['mode_commande'] == 'LIVRAISON' ? '🛵 Livraison' : (commande['numero_table']?.toString() ?? 'Retrait sur place'),
   );
@@ -40,11 +40,12 @@ String _texteTicket(Map<String, dynamic> commande) {
   buffer.writeln('TOTAL : ${commande['total']} FCFA');
   buffer.writeln();
   buffer.writeln('Merci et bon appétit !');
+  buffer.writeln('JOJ Dakar 2026');
   return buffer.toString();
 }
 
 Future<void> _partagerTicket(Map<String, dynamic> commande) async {
-  await Share.share(_texteTicket(commande), subject: 'Ticket #${commande['id']} — Fast & Delicious');
+  await Share.share(_texteTicket(commande), subject: 'Reçu #${commande['id']}');
 }
 
 /// Affiche le détail complet d'une commande (lecture seule), accessible à l'admin

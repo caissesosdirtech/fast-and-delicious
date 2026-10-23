@@ -100,6 +100,29 @@ class Commande {
   bool get enLivraison => modeCommande == 'LIVRAISON';
   bool get aTable => !enLivraison && numeroTable != null && numeroTable!.trim().isNotEmpty;
 
+  /// Convertit la commande en Map compatible avec ouvrirTicketDetail (reçu).
+  Map<String, dynamic> toTicketMap() => {
+        'id': id,
+        'statut': statut,
+        'numero_table': numeroTable,
+        'mode_commande': modeCommande,
+        'adresse_livraison': adresseLivraison,
+        'telephone_client': telephoneClient,
+        'mode_paiement': modePaiement,
+        'reference_paiement': referencePaiement,
+        'remarque': remarque,
+        'motif_annulation': motifAnnulation,
+        'date_creation': dateCreation.toIso8601String(),
+        'total': total,
+        'lignes': lignes
+            .map((l) => {
+                  'quantite': l.quantite,
+                  'plat_nom': l.platNom,
+                  'sous_total': l.sousTotal,
+                })
+            .toList(),
+      };
+
   factory Commande.fromJson(Map<String, dynamic> json) {
     return Commande(
       id: json['id'],

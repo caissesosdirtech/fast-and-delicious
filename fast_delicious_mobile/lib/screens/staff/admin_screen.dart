@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../services/api_client.dart';
 import '../../services/websocket_service.dart';
 import '../../services/son_service.dart';
+import '../../services/notifications_service.dart';
 import '../../widgets/staff_scaffold.dart';
 import '../../widgets/kpi_card.dart';
 import '../../widgets/empty_state.dart';
@@ -27,7 +28,7 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
-  int _rubrique = 0;
+  int _rubrique = 1; // 1 = Dashboard (l'index 0 est "Caisse", qui ouvre un autre écran)
   int _ongletDashboardMobile = 0; // 0 Aperçu, 1 Ventes, 2 Commandes, 3 Activité
   Map<String, dynamic>? _stats;
   List<Map<String, dynamic>> _lieux = [];
@@ -55,6 +56,7 @@ class _AdminScreenState extends State<AdminScreen> {
       SonService.jouerNotification();
       final evenement = data['evenement'] ?? '';
       final idCmd = data['commande_id'];
+      if (evenement == 'nouvelle_commande') NotificationsService.instance.signalerNouvelle((idCmd as num?)?.toInt());
       setState(() {
         _activiteTempsReel.insert(0, '$evenement — Commande #$idCmd ($origine)');
         if (_activiteTempsReel.length > 8) _activiteTempsReel.removeLast();
@@ -104,6 +106,7 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget build(BuildContext context) {
     return StaffScaffold(
       items: const [
+        SidebarItem('💳', 'Caisse'),
         SidebarItem('📊', 'Dashboard'),
         SidebarItem('🍔', 'Produits'),
         SidebarItem('🏷️', 'Catégories'),
@@ -115,7 +118,16 @@ class _AdminScreenState extends State<AdminScreen> {
         SidebarItem('⚙️', 'Paramètres'),
       ],
       indexActif: _rubrique,
-      onChangerIndex: (i) => setState(() => _rubrique = i),
+      onChangerIndex: (i) {
+        // "Caisse" (1er item) ouvre l'écran caisse complet : l'admin y encaisse
+        // et suit le flux Valider → Prête → Terminer, comme une caissière.
+        if (i == 0) {
+          Navigator.pushNamed(context, '/caisse');
+        } else {
+          setState(() => _rubrique = i);
+        }
+      },
+      onNotificationsTap: () => Navigator.pushNamed(context, '/caisse'),
       contenu: RefreshIndicator(
         onRefresh: _charger,
         child: SingleChildScrollView(
@@ -128,13 +140,13 @@ class _AdminScreenState extends State<AdminScreen> {
 
   Widget _contenuRubrique() {
     switch (_rubrique) {
-      case 1: return const ProduitsContenu();
-      case 2: return const CategoriesContenu();
-      case 3: return const TablesContenu();
-      case 4: return const LieuxContenu();
-      case 5: return const EmployesContenu();
-      case 8: return const ParametresContenu();
-      default: return _buildDashboard(); // 0 Dashboard, 6 Commandes, 7 Statistiques
+      case 2: return const ProduitsContenu();
+      case 3: return const CategoriesContenu();
+      case 4: return const TablesContenu();
+      case 5: return const LieuxContenu();
+      case 6: return const EmployesContenu();
+      case 9: return const ParametresContenu();
+      default: return _buildDashboard(); // 1 Dashboard, 7 Commandes, 8 Statistiques
     }
   }
 
@@ -161,22 +173,35 @@ class _AdminScreenState extends State<AdminScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Bienvenue, Admin', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text('Aperçu de votre activité — ${DateFormat.yMMMMd('fr_FR').format(date)}',
-                      style: const TextStyle(fontSize: 12.5, color: AppColors.inkSoft), overflow: TextOverflow.ellipsis),
-                ],
-              ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(18, 16, 8, 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.ink, Color(0xFF3A3327)],
             ),
-            IconButton(onPressed: _choisirDate, icon: const Icon(Icons.calendar_month)),
-            IconButton(onPressed: () => _charger(), icon: const Icon(Icons.refresh)),
-          ],
+            boxShadow: [BoxShadow(color: AppColors.ink.withOpacity(0.25), blurRadius: 14, offset: const Offset(0, 6))],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Bienvenue, Admin 👋', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const SizedBox(height: 3),
+                    Text('Aperçu de votre activité — ${DateFormat.yMMMMd('fr_FR').format(date)}',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFFC9C1B0)), overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
+              IconButton(onPressed: _choisirDate, icon: const Icon(Icons.calendar_month, color: AppColors.gold)),
+              IconButton(onPressed: () => _charger(), icon: const Icon(Icons.refresh, color: AppColors.gold)),
+            ],
+          ),
         ),
         if (s['est_aujourdhui'] == false) ...[
           const SizedBox(height: 10),
@@ -280,10 +305,10 @@ class _AdminScreenState extends State<AdminScreen> {
           Wrap(
             spacing: 12, runSpacing: 12,
             children: [
-              SizedBox(width: largeurKpi, child: KpiCard(label: 'Commandes du jour', valeur: '${s['nombre_commandes']}')),
-              SizedBox(width: largeurKpi, child: KpiCard(label: "Chiffre d'affaires", valeur: '${_fmt(s['chiffre_affaires'])} F', couleurValeur: AppColors.green)),
-              SizedBox(width: largeurKpi, child: KpiCard(label: 'En attente', valeur: '${commandesParStatut['EN_ATTENTE'] ?? 0}', couleurValeur: AppColors.gold)),
-              SizedBox(width: largeurKpi, child: KpiCard(label: 'En préparation', valeur: '${commandesParStatut['EN_PREPARATION'] ?? 0}')),
+              SizedBox(width: largeurKpi, child: KpiCard(label: 'Commandes du jour', valeur: '${s['nombre_commandes']}', couleurValeur: const Color(0xFF1D5BA8), icone: '🧾')),
+              SizedBox(width: largeurKpi, child: KpiCard(label: "Chiffre d'affaires", valeur: '${_fmt(s['chiffre_affaires'])} F', couleurValeur: AppColors.green, icone: '💰')),
+              SizedBox(width: largeurKpi, child: KpiCard(label: 'En attente', valeur: '${commandesParStatut['EN_ATTENTE'] ?? 0}', couleurValeur: AppColors.gold, icone: '⏳')),
+              SizedBox(width: largeurKpi, child: KpiCard(label: 'Prêtes', valeur: '${commandesParStatut['PRETE'] ?? 0}', couleurValeur: AppColors.green, icone: '✅')),
             ],
           ),
           const SizedBox(height: 16),
@@ -388,13 +413,26 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget _panel({required String titre, required Widget enfant}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.panel, border: Border.all(color: AppColors.line, width: 1.5), borderRadius: BorderRadius.circular(14)),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.panel,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.line.withOpacity(0.6), width: 1),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12, offset: const Offset(0, 4)),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(titre, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-          const SizedBox(height: 14),
+          Row(
+            children: [
+              Container(width: 4, height: 16, decoration: BoxDecoration(color: AppColors.gold, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(width: 8),
+              Expanded(child: Text(titre, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5))),
+            ],
+          ),
+          const SizedBox(height: 16),
           enfant,
         ],
       ),
@@ -415,7 +453,11 @@ class _AdminScreenState extends State<AdminScreen> {
         LineChartData(
           minY: 0,
           maxY: maxY,
-          gridData: const FlGridData(show: true, drawVerticalLine: false),
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (v) => FlLine(color: AppColors.line.withOpacity(0.5), strokeWidth: 1, dashArray: const [4, 4]),
+          ),
           titlesData: FlTitlesData(
             rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -440,10 +482,17 @@ class _AdminScreenState extends State<AdminScreen> {
             LineChartBarData(
               spots: spots,
               isCurved: true,
-              color: AppColors.red,
-              barWidth: 3,
-              dotData: const FlDotData(show: true),
-              belowBarData: BarAreaData(show: true, color: AppColors.red.withOpacity(0.08)),
+              gradient: const LinearGradient(colors: [AppColors.gold, AppColors.red]),
+              barWidth: 3.5,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [AppColors.gold.withOpacity(0.28), AppColors.gold.withOpacity(0.0)],
+                ),
+              ),
             ),
           ],
         ),
@@ -460,23 +509,35 @@ class _AdminScreenState extends State<AdminScreen> {
     return Column(
       children: [
         SizedBox(
-          height: 150,
-          child: PieChart(
-            PieChartData(
-              sectionsSpace: 2,
-              centerSpaceRadius: 30,
-              sections: List.generate(topPlats.length, (i) {
-                final q = topPlats[i]['quantite'] as int;
-                final pourcentage = total == 0 ? 0 : (q / total * 100);
-                return PieChartSectionData(
-                  value: q.toDouble(),
-                  color: couleurs[i % couleurs.length],
-                  title: '${pourcentage.toStringAsFixed(0)}%',
-                  radius: 45,
-                  titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-                );
-              }),
-            ),
+          height: 160,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PieChart(
+                PieChartData(
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 38,
+                  sections: List.generate(topPlats.length, (i) {
+                    final q = topPlats[i]['quantite'] as int;
+                    final pourcentage = total == 0 ? 0 : (q / total * 100);
+                    return PieChartSectionData(
+                      value: q.toDouble(),
+                      color: couleurs[i % couleurs.length],
+                      title: '${pourcentage.toStringAsFixed(0)}%',
+                      radius: 46,
+                      titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                    );
+                  }),
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('$total', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.ink)),
+                  const Text('ventes', style: TextStyle(fontSize: 10, color: AppColors.inkSoft)),
+                ],
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),

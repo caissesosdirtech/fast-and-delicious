@@ -48,23 +48,16 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  'assets/logo-fast-delicious.jpg',
-                  width: 84, height: 84, fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 84, height: 84,
-                    decoration: BoxDecoration(color: AppColors.gold, borderRadius: BorderRadius.circular(16)),
-                    child: const Icon(Icons.lunch_dining, size: 40, color: AppColors.ink),
-                  ),
-                ),
+              Container(
+                width: 84, height: 84,
+                decoration: BoxDecoration(color: AppColors.gold, borderRadius: BorderRadius.circular(16)),
+                child: const Icon(Icons.restaurant_menu, size: 40, color: AppColors.ink),
               ),
               const SizedBox(height: 16),
-              const Text('FAST & DELICIOUS',
+              const Text('NOTRE MENU',
                   style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
               const SizedBox(height: 4),
-              const Text('Le goût : notre priorité',
+              const Text('Commandez directement depuis votre place',
                   style: TextStyle(color: AppColors.gold, fontSize: 13, fontStyle: FontStyle.italic)),
               const SizedBox(height: 34),
 
@@ -130,7 +123,7 @@ class WelcomeScreen extends StatelessWidget {
               TextButton.icon(
                 onPressed: () => Navigator.pushNamed(context, '/staff/login'),
                 icon: const Icon(Icons.badge_outlined, size: 16, color: AppColors.gold),
-                label: const Text('Espace staff (caisse / cuisine / livreur / admin)',
+                label: const Text('Espace staff (caisse / admin)',
                     style: TextStyle(color: AppColors.gold, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
             ],

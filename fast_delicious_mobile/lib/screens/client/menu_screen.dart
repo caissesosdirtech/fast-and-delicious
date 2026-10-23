@@ -62,11 +62,26 @@ class _MenuScreenState extends State<MenuScreen> {
     }
   }
 
-  List<Plat> get _formules =>
-      _categories.expand((c) => c.plats.where((p) => p.estFormule)).toList();
+  /// Une catégorie dont le nom contient « formule » est une vitrine de formules :
+  /// tous ses plats sont mis en avant en haut (comme le web), même sans groupe de choix.
+  bool _categorieEstFormule(String nom) => nom.toLowerCase().contains('formule');
+
+  /// Formules mises en avant : tous les plats des catégories « Formules »
+  /// + les formules composées (à choix) qui se trouveraient dans une autre rubrique.
+  List<Plat> get _formules {
+    final posters = _categories.where((c) => _categorieEstFormule(c.nom)).expand((c) => c.plats);
+    final composees = _categories
+        .where((c) => !_categorieEstFormule(c.nom))
+        .expand((c) => c.plats.where((p) => p.estFormule));
+    return [...posters, ...composees];
+  }
 
   List<Plat> get _platsAffiches {
-    final tousLesPlats = _categories.expand((c) => c.plats.where((p) => !p.estFormule));
+    // Plats ordinaires : on exclut les catégories « Formules » et les plats à choix
+    // (déjà montrés en vitrine en haut).
+    final tousLesPlats = _categories
+        .where((c) => !_categorieEstFormule(c.nom))
+        .expand((c) => c.plats.where((p) => !p.estFormule));
     var filtres = _categorieActiveId == null
         ? tousLesPlats
         : tousLesPlats.where((p) => p.categorieId == _categorieActiveId);
@@ -226,7 +241,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   ),
                 ],
               ),
-              if (_lieux.length > 1)
+              if (_lieux.length > 1 && cart.modeCommande != 'LIVRAISON')
                 Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: Container(
@@ -273,7 +288,12 @@ class _MenuScreenState extends State<MenuScreen> {
                   scrollDirection: Axis.horizontal,
                   children: [
                     _chipCategorie('Toutes', null),
-                    ..._categories.map((c) => _chipCategorie(c.nom, c.id)),
+                    // On masque les catégories « Formules » (mises en avant en haut) et
+                    // celles qui ne contiendraient que des plats à choix.
+                    ..._categories
+                        .where((c) => !_categorieEstFormule(c.nom))
+                        .where((c) => c.plats.any((p) => !p.estFormule))
+                        .map((c) => _chipCategorie(c.nom, c.id)),
                   ],
                 ),
               ),
@@ -341,7 +361,13 @@ class _MenuScreenState extends State<MenuScreen> {
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), gradient: const LinearGradient(colors: [AppColors.gold, AppColors.red])),
             alignment: Alignment.center,
             child: plat.imageUrl != null
-                ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network(plat.imageUrl!, width: 60, height: 60, fit: BoxFit.cover))
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(plat.imageUrl!, width: 60, height: 60, fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => photoLocalePlat(plat.nom) != null
+                            ? Image.asset(photoLocalePlat(plat.nom)!, width: 60, height: 60, fit: BoxFit.cover)
+                            : const Text('🍱', style: TextStyle(fontSize: 24))),
+                  )
                 : (photoLocalePlat(plat.nom) != null
                     ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.asset(photoLocalePlat(plat.nom)!, width: 60, height: 60, fit: BoxFit.cover))
                     : const Text('🍱', style: TextStyle(fontSize: 24))),
@@ -376,7 +402,14 @@ class _MenuScreenState extends State<MenuScreen> {
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), gradient: const LinearGradient(colors: [AppColors.gold, AppColors.red])),
             alignment: Alignment.center,
             child: plat.imageUrl != null
-                ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.network(plat.imageUrl!, width: 56, height: 56, fit: BoxFit.cover))
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(plat.imageUrl!, width: 56, height: 56, fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => photoLocalePlat(plat.nom) != null
+                            ? Image.asset(photoLocalePlat(plat.nom)!, width: 56, height: 56, fit: BoxFit.cover)
+                            : Text(_iconePourCategorie(_categories.firstWhere((c) => c.id == plat.categorieId, orElse: () => _categories.first).nom),
+                                style: const TextStyle(fontSize: 22))),
+                  )
                 : (photoLocalePlat(plat.nom) != null
                     ? ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.asset(photoLocalePlat(plat.nom)!, width: 56, height: 56, fit: BoxFit.cover))
                     : Text(_iconePourCategorie(_categories.firstWhere((c) => c.id == plat.categorieId, orElse: () => _categories.first).nom),
