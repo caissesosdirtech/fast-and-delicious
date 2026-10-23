@@ -94,10 +94,34 @@
 .caisse-periode-active {
   border: 1px solid var(--border);
   background: var(--surface);
+  color: var(--ink);
   padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
+}
+
+.caisse-periode-btn:hover {
+  border-color: var(--accent);
+}
+
+/* En mode sombre, on force un texte BLANC lisible sur les onglets de période
+   (sinon ils héritaient d'une couleur foncée, illisible sur le fond sombre). */
+.staff-layout.theme-sombre .caisse-periode-btn {
+  color: #ffffff;
+  background: #1f2b40;
+  border-color: #33415c;
+}
+
+.staff-layout.theme-sombre .caisse-periode-btn:hover {
+  background: #26344e;
+  border-color: var(--accent);
+}
+
+.staff-layout.theme-sombre .caisse-date-input {
+  color: #ffffff;
+  background: #1f2b40;
+  border-color: #33415c;
 }
 
 .caisse-periode-active {
