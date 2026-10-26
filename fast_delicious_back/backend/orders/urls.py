@@ -22,4 +22,5 @@ urlpatterns = [
     # Admin
     path("admin/statistiques/", views.StatistiquesAdminView.as_view(), name="admin-statistiques"),
     path("admin/caisse/",EtatCaisseView.as_view(), name="etat-caisse"),
+    path("admin/caisse/export/", views.ExportCaisseView.as_view(), name="admin-caisse-export"),
 ]

@@ -697,18 +697,19 @@ class ExportCaisseView(APIView):
         for c in commandes:
             total = c.total
             chiffre += total
-            par_mode[c.mode_paiement] = par_mode.get(c.mode_paiement, 0) + total
+            mode_p = getattr(c, "mode_paiement", "ESPECES")
+            par_mode[mode_p] = par_mode.get(mode_p, 0) + total
             articles = ", ".join(f"{l.quantite}x {l.plat.nom}" for l in c.lignes.all())
-            if c.mode_commande == Commande.ModeCommande.LIVRAISON:
+            if getattr(c, "mode_commande", "SUR_PLACE") == "LIVRAISON":
                 lieu_txt = "Livraison"
             else:
-                lieu_txt = c.numero_table or "Sur place"
+                lieu_txt = getattr(c, "numero_table", "") or "Sur place"
             ventes.append({
                 "id": c.id,
                 "heure": timezone.localtime(c.date_creation).strftime("%d/%m %H:%M"),
                 "lieu": lieu_txt,
                 "articles": articles,
-                "mode": LABELS_MODE_PAIEMENT.get(c.mode_paiement, c.mode_paiement),
+                "mode": LABELS_MODE_PAIEMENT.get(mode_p, mode_p),
                 "statut": c.statut,
                 "total": total,
             })
