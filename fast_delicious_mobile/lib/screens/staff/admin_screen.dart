@@ -56,7 +56,6 @@ class _AdminScreenState extends State<AdminScreen> {
       SonService.jouerNotification();
       final evenement = data['evenement'] ?? '';
       final idCmd = data['commande_id'];
-      if (evenement == 'nouvelle_commande') NotificationsService.instance.signalerNouvelle((idCmd as num?)?.toInt());
       setState(() {
         _activiteTempsReel.insert(0, '$evenement — Commande #$idCmd ($origine)');
         if (_activiteTempsReel.length > 8) _activiteTempsReel.removeLast();
@@ -83,7 +82,15 @@ class _AdminScreenState extends State<AdminScreen> {
       if (_lieuFiltre != null) 'lieu': _lieuFiltre,
       if (_dateFiltre != null) 'date': DateFormat('yyyy-MM-dd').format(_dateFiltre!),
     });
-    if (mounted) setState(() => _stats = reponse.data);
+    if (mounted) {
+      setState(() => _stats = reponse.data);
+      // Badge = commandes en attente du jour (auto-mis à jour). On ne touche pas
+      // au badge quand on consulte une date passée.
+      if (_dateFiltre == null) {
+        final parStatut = Map<String, dynamic>.from(_stats?['commandes_par_statut'] ?? {});
+        NotificationsService.instance.definir(((parStatut['EN_ATTENTE'] ?? 0) as num).toInt());
+      }
+    }
   }
 
   Future<void> _choisirDate() async {

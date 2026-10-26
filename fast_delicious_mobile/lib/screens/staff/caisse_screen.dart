@@ -56,9 +56,8 @@ class _CaisseScreenState extends State<CaisseScreen> {
       if (!mounted) return;
       if (data['evenement'] == 'nouvelle_commande') {
         SonService.jouerNotification();
-        NotificationsService.instance.signalerNouvelle((data['commande_id'] as num?)?.toInt());
       }
-      _charger(silencieux: true);
+      _charger(silencieux: true); // met aussi à jour le badge (commandes en attente)
       if (_rubrique == 2) _chargerPaiementsRecents();
       if (_rubrique == 3) _chargerHistoriqueRecent();
     });
@@ -89,6 +88,8 @@ class _CaisseScreenState extends State<CaisseScreen> {
         }
       }
     });
+    // Badge = nombre de commandes réellement en attente (baisse quand on les traite).
+    NotificationsService.instance.definir(_fileAttente.where((c) => c.statut == 'EN_ATTENTE').length);
   }
 
   Future<void> _chargerPaiementsRecents() async {

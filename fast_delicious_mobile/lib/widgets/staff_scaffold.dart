@@ -51,8 +51,8 @@ class ClocheNotifications extends StatelessWidget {
               icon: Icon(nb > 0 ? Icons.notifications_active : Icons.notifications_none, color: couleurIcone),
               tooltip: 'Nouvelles commandes',
               onPressed: () {
-                NotificationsService.instance.reinitialiser();
-                // Renvoie directement vers la liste des commandes pour pouvoir valider.
+                // Le badge reflète les commandes en attente : il se vide tout seul
+                // une fois qu'elles sont traitées. Ici on ouvre juste la liste.
                 if (onTap != null) onTap!();
               },
             ),
