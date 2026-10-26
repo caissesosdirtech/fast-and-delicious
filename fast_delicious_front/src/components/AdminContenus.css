@@ -130,6 +130,12 @@
   border-color: var(--accent);
 }
 
+.caisse-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .caisse-date-input {
   border: 1px solid var(--border);
   background: var(--surface);

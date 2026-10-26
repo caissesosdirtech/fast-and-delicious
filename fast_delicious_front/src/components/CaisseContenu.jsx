@@ -63,6 +63,28 @@ export default function CaisseContenu() {
     }
   }
 
+  async function telecharger(format) {
+    try {
+      // On exporte la même période/date que celle affichée.
+      const params = dateJour ? `date=${dateJour}` : `periode=${periode}`;
+      const res = await client.get(
+        `admin/caisse/export/?${params}&format=${format}`,
+        { responseType: "blob" }
+      );
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `caisse.${format === "xlsx" ? "xlsx" : "pdf"}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert("Téléchargement impossible pour le moment.");
+    }
+  }
+
   if (chargement) {
     return (
       <p className="chargement-texte">
@@ -106,12 +128,17 @@ export default function CaisseContenu() {
           </p>
         </div>
 
-        <button
-          className="refresh-btn"
-          onClick={charger}
-        >
-          🔄 Actualiser
-        </button>
+        <div className="caisse-actions">
+          <button className="refresh-btn" onClick={() => telecharger("pdf")}>
+            📄 PDF
+          </button>
+          <button className="refresh-btn" onClick={() => telecharger("xlsx")}>
+            📊 Excel
+          </button>
+          <button className="refresh-btn" onClick={charger}>
+            🔄 Actualiser
+          </button>
+        </div>
       </div>
 
       {/* BOUTONS DES PÉRIODES */}
