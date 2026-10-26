@@ -206,7 +206,6 @@ export default function CaisseContenu() {
 
       </div>
 
-
       {/* KPIs */}
 
       <div className="kpi-grid">
