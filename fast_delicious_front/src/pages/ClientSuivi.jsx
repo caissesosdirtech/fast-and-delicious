@@ -156,7 +156,7 @@ export default function ClientSuivi() {
 
       <div className="imprimer-wrap no-print">
         <button className="imprimer-btn" onClick={() => window.print()}>
-          🖨️ Imprimer le ticket
+          💾 Enregistrer le ticket
         </button>
       </div>
 
