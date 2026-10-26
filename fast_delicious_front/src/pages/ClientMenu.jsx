@@ -212,10 +212,6 @@ export default function ClientMenu() {
           <h1 className="menu-hero-title font-display">Notre menu</h1>
           <p className="menu-hero-sub">Compose ta commande — <strong>{totalPlats} plats</strong> t'attendent au marché.</p>
 
-          <a href="tel:+221761270766" className="appel-commande">
-            📞 Commander par téléphone : <span className="font-mono">+221 76 127 07 66</span>
-          </a>
-
           {lieux.length > 1 && modeCommande !== "LIVRAISON" && (
             <div className="lieu-select-wrap">
               <select

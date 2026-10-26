@@ -16,11 +16,6 @@ export default function TopBar() {
 
       <div className="topbar-right">
         {!utilisateur && (
-          <a href="tel:+221761270766" className="topbar-call-link">
-            📞 <span className="topbar-call-number">76 127 07 66</span>
-          </a>
-        )}
-        {!utilisateur && (
           <Link to="/menu" className="topbar-vitrine-link">📖 Voir le menu</Link>
         )}
         {!utilisateur && (

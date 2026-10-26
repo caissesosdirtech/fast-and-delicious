@@ -8,11 +8,7 @@ export default function Footer() {
       <div className="app-footer-inner">
 
         <div className="app-footer-copyright">
-          <span>© {annee} <strong>Deep Mind Technologie (DMT)</strong> — Tous droits réservés</span>
-          <span className="footer-sep" aria-hidden="true">·</span>
-          <a href="tel:+221775470087" className="app-footer-link">📞 77 547 00 87</a>
-          <span className="footer-sep" aria-hidden="true">·</span>
-          <a href="mailto:cissemadamel86@gmail.com" className="app-footer-link">✉️ cissemadamel86@gmail.com</a>
+          <span>© {annee} · JOJ Dakar 2026</span>
         </div>
 
       </div>

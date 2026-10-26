@@ -130,9 +130,6 @@ export default function MenuVitrine() {
       <div className="vitrine-hero">
         <h1 className="font-display">Notre menu complet</h1>
         <p>{totalPlats} plats répartis en {categories.length} rubriques — tout ce que propose notre cuisine.</p>
-        <a href="tel:+221761270766" className="appel-commande">
-          📞 Commander par téléphone : <span className="font-mono">+221 76 127 07 66</span>
-        </a>
       </div>
 
       {/* Vitrine spéciale "Nos formules" — affiches toutes faites */}
