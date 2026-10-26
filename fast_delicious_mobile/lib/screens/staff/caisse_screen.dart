@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../config/theme.dart';
 import '../../services/api_client.dart';
@@ -43,6 +45,7 @@ class _CaisseScreenState extends State<CaisseScreen> {
   List<Map<String, dynamic>>? _paiementsRecents;
   List<Map<String, dynamic>>? _historiqueRecent;
   Commande? _selectionnee;
+  bool _exportEnCours = false;
   final Map<int, bool> _enTraitement = {};
   final _ws = WebSocketService();
   Timer? _timer;
@@ -160,6 +163,33 @@ class _CaisseScreenState extends State<CaisseScreen> {
 
   void _ouvrirRecu(Commande cmd) => ouvrirTicketDetail(context, cmd.toTicketMap());
 
+  /// Télécharge le rapport de caisse du jour (PDF ou Excel) et ouvre le partage
+  /// (enregistrer dans Fichiers, envoyer par WhatsApp/mail, etc.).
+  Future<void> _exporter(String format) async {
+    setState(() => _exportEnCours = true);
+    try {
+      final res = await ApiClient().dio.get(
+        'admin/caisse/export/',
+        queryParameters: {'format': format, 'periode': 'jour'},
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final bytes = (res.data as List).cast<int>();
+      final dossier = Directory.systemTemp.createTempSync('caisse');
+      final ext = format == 'xlsx' ? 'xlsx' : 'pdf';
+      final chemin = '${dossier.path}/rapport_caisse_du_jour.$ext';
+      await File(chemin).writeAsBytes(bytes);
+      await Share.shareXFiles([XFile(chemin)], subject: 'Rapport de caisse du jour');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Téléchargement impossible.'), backgroundColor: AppColors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _exportEnCours = false);
+    }
+  }
+
   /// Renvoie l'action principale à proposer selon le statut, ou null si la
   /// commande est terminée / annulée (plus d'action de progression).
   _ActionPrincipale? _actionPrincipale(String statut) {
@@ -257,6 +287,48 @@ class _CaisseScreenState extends State<CaisseScreen> {
               SizedBox(width: largeurKpi, child: KpiCard(label: 'Prêtes', valeur: '${commandesParStatut['PRETE'] ?? 0}', couleurValeur: AppColors.green)),
               SizedBox(width: largeurKpi, child: KpiCard(label: 'Commandes du jour', valeur: '${s['nombre_commandes']}')),
             ],
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.panel,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.line.withOpacity(0.6)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Expanded(child: Text('Rapport de caisse du jour', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))),
+                    if (_exportEnCours)
+                      const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _exportEnCours ? null : () => _exporter('pdf'),
+                        icon: const Text('📄', style: TextStyle(fontSize: 14)),
+                        label: const Text('PDF'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _exportEnCours ? null : () => _exporter('xlsx'),
+                        icon: const Text('📊', style: TextStyle(fontSize: 14)),
+                        label: const Text('Excel'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
           const Text('Commandes en cours', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
