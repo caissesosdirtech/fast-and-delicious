@@ -33,4 +33,5 @@ urlpatterns = [
     # Admin
     path("admin/statistiques/", views.StatistiquesAdminView.as_view(), name="admin-statistiques"),
     path("admin/caisse/", views.EtatCaisseView.as_view(), name="admin-caisse",),
+    path("admin/caisse/export/", views.ExportCaisseView.as_view(), name="admin-caisse-export",),
 ]
