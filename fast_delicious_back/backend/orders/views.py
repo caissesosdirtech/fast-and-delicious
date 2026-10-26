@@ -350,7 +350,7 @@ class ExportCaisseView(APIView):
     def get(self, request):
         periode = request.query_params.get("periode", "jour")
         date_str = request.query_params.get("date")
-        fmt = request.query_params.get("format", "pdf").lower()
+        fmt = request.query_params.get("fmt", "pdf").lower()
         aujourd_hui = timezone.localdate()
 
         try:
