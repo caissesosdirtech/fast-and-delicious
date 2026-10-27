@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import client from "../api/client";
 import EmptyState from "./EmptyState";
+import { photoLocalePlat } from "../data/photosPlats";
 import "./AdminContenus.css";
 
 export default function ProduitsContenu() {
@@ -8,6 +9,9 @@ export default function ProduitsContenu() {
   const [categories, setCategories] = useState([]);
   const [chargement, setChargement] = useState(true);
   const [formulaireOuvert, setFormulaireOuvert] = useState(null);
+  const [recherche, setRecherche] = useState("");
+  const [filtreCategorie, setFiltreCategorie] = useState("toutes");
+  const [vue, setVue] = useState("tableau");
 
   function charger() {
     setChargement(true);
@@ -35,6 +39,28 @@ export default function ProduitsContenu() {
   function nomCategorie(id) {
     return categories.find((c) => c.id === id)?.nom || "—";
   }
+
+  // Retire les accents et met en minuscules, pour une recherche tolérante.
+  function normaliser(t) {
+    return (t || "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "");
+  }
+
+  const texteRecherche = normaliser(recherche).trim();
+  const platsFiltres = plats.filter((p) => {
+    const matchCat =
+      filtreCategorie === "toutes" ||
+      String(p.categorie) === String(filtreCategorie);
+    if (!matchCat) return false;
+    if (!texteRecherche) return true;
+    const cible = normaliser(
+      `${p.nom} ${p.description || ""} ${nomCategorie(p.categorie)}`
+    );
+    return cible.includes(texteRecherche);
+  });
 
   async function basculerDisponibilite(plat) {
     try {
@@ -67,7 +93,9 @@ export default function ProduitsContenu() {
   return (
     <div>
       <div className="admin-contenu-header">
-        <h3>Produits</h3>
+        <h3>
+          Produits <span className="produits-compteur">{platsFiltres.length}</span>
+        </h3>
 
         <button
           className="admin-btn-ajouter"
@@ -77,8 +105,104 @@ export default function ProduitsContenu() {
         </button>
       </div>
 
-      {plats.length === 0 ? (
-        <EmptyState icon="🍔" title="Aucun plat" />
+      {/* Barre d'outils : recherche + filtre catégorie + bascule d'affichage */}
+      <div className="produits-toolbar">
+        <div className="produits-search">
+          <span className="produits-search-icone" aria-hidden="true">🔍</span>
+          <input
+            type="text"
+            value={recherche}
+            onChange={(e) => setRecherche(e.target.value)}
+            placeholder="Rechercher un produit..."
+          />
+          {recherche && (
+            <button
+              className="produits-search-clear"
+              onClick={() => setRecherche("")}
+              title="Effacer la recherche"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        <select
+          className="produits-filtre-cat"
+          value={filtreCategorie}
+          onChange={(e) => setFiltreCategorie(e.target.value)}
+        >
+          <option value="toutes">Toutes les catégories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nom}
+            </option>
+          ))}
+        </select>
+
+        <div className="produits-vue-switch">
+          <button
+            className={vue === "tableau" ? "actif" : ""}
+            onClick={() => setVue("tableau")}
+            title="Vue tableau"
+          >
+            ☰ Tableau
+          </button>
+          <button
+            className={vue === "grille" ? "actif" : ""}
+            onClick={() => setVue("grille")}
+            title="Vue grille"
+          >
+            ▦ Grille
+          </button>
+        </div>
+      </div>
+
+      {platsFiltres.length === 0 ? (
+        <EmptyState
+          icon="🍔"
+          title={plats.length === 0 ? "Aucun plat" : "Aucun résultat"}
+        />
+      ) : vue === "grille" ? (
+        <div className="produits-grid">
+          {platsFiltres.map((p) => {
+            const img = p.image || photoLocalePlat(p.nom);
+            return (
+              <div className="produit-card" key={p.id}>
+                <div className="produit-card-img">
+                  {img ? (
+                    <img src={img} alt={p.nom} loading="lazy" />
+                  ) : (
+                    <span aria-hidden="true">🍔</span>
+                  )}
+                  <span
+                    className={
+                      p.disponible
+                        ? "produit-dispo dispo-ok"
+                        : "produit-dispo dispo-non"
+                    }
+                    onClick={() => basculerDisponibilite(p)}
+                    title="Changer la disponibilité"
+                  >
+                    {p.disponible ? "Disponible" : "Indisponible"}
+                  </span>
+                </div>
+                <div className="produit-card-body">
+                  <div className="produit-card-nom">{p.nom}</div>
+                  <div className="produit-card-cat">{nomCategorie(p.categorie)}</div>
+                  <div className="produit-card-prix">{p.prix} F</div>
+                </div>
+                <div className="produit-card-actions">
+                  <button onClick={() => setFormulaireOuvert(p)} title="Modifier">
+                    ✏️
+                  </button>
+                  <button onClick={() => supprimer(p)} title="Supprimer">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : (
         <div className="admin-table-wrap">
           <table className="admin-table">
@@ -94,77 +218,80 @@ export default function ProduitsContenu() {
             </thead>
 
             <tbody>
-              {plats.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    {p.image ? (
-                      <img
-                        src={p.image}
-                        alt={p.nom}
-                        style={{
-                          width: 58,
-                          height: 58,
-                          objectFit: "cover",
-                          borderRadius: 10,
-                          display: "block"
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: 58,
-                          height: 58,
-                          borderRadius: 10,
-                          background: "#f2f2f2",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 24
-                        }}
-                        title="Aucune photo"
+              {platsFiltres.map((p) => {
+                const img = p.image || photoLocalePlat(p.nom);
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      {img ? (
+                        <img
+                          src={img}
+                          alt={p.nom}
+                          style={{
+                            width: 58,
+                            height: 58,
+                            objectFit: "cover",
+                            borderRadius: 10,
+                            display: "block"
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: 58,
+                            height: 58,
+                            borderRadius: 10,
+                            background: "#f2f2f2",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 24
+                          }}
+                          title="Aucune photo"
+                        >
+                          🍔
+                        </div>
+                      )}
+                    </td>
+
+                    <td>{p.nom}</td>
+
+                    <td>{nomCategorie(p.categorie)}</td>
+
+                    <td>{p.prix} F</td>
+
+                    <td>
+                      <span
+                        className={
+                          p.disponible
+                            ? "admin-badge-actif"
+                            : "admin-badge-inactif"
+                        }
+                        style={{ cursor: "pointer" }}
+                        onClick={() => basculerDisponibilite(p)}
                       >
-                        🍔
-                      </div>
-                    )}
-                  </td>
+                        {p.disponible ? "Disponible" : "Indisponible"}
+                      </span>
+                    </td>
 
-                  <td>{p.nom}</td>
+                    <td>
+                      <button
+                        onClick={() => setFormulaireOuvert(p)}
+                        title="Modifier"
+                      >
+                        ✏️
+                      </button>
 
-                  <td>{nomCategorie(p.categorie)}</td>
-
-                  <td>{p.prix} F</td>
-
-                  <td>
-                    <span
-                      className={
-                        p.disponible
-                          ? "admin-badge-actif"
-                          : "admin-badge-inactif"
-                      }
-                      style={{ cursor: "pointer" }}
-                      onClick={() => basculerDisponibilite(p)}
-                    >
-                      {p.disponible ? "Disponible" : "Indisponible"}
-                    </span>
-                  </td>
-
-                  <td>
-                    <button
-                      onClick={() => setFormulaireOuvert(p)}
-                      title="Modifier"
-                    >
-                      ✏️
-                    </button>
-
-                    <button
-                      onClick={() => supprimer(p)}
-                      title="Supprimer"
-                    >
-                      🗑️
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <button
+                        onClick={() => supprimer(p)}
+                        title="Supprimer"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
