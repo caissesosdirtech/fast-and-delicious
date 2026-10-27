@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import client from "../api/client";
+import client, { API_BASE_URL } from "../api/client";
 import EmptyState from "./EmptyState";
 import "./AdminContenus.css";
 
@@ -66,10 +66,11 @@ export default function CaisseContenu() {
   async function telecharger(format) {
     try {
       // On exporte la même période/date que celle affichée.
+      // Le paramètre _t (horodatage) force une requête unique → jamais servie depuis le cache.
       const params = dateJour ? `date=${dateJour}` : `periode=${periode}`;
       const res = await client.get(
-        `admin/caisse/export/?${params}&format=${format}`,
-        { responseType: "blob" }
+        `admin/caisse/export/?${params}&fmt=${format}&_t=${Date.now()}`,
+        { responseType: "blob", headers: { "Cache-Control": "no-cache" } }
       );
       const url = URL.createObjectURL(res.data);
       const a = document.createElement("a");
@@ -80,8 +81,25 @@ export default function CaisseContenu() {
       a.remove();
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error(error);
-      alert("Téléchargement impossible pour le moment.");
+      console.error("Export caisse:", error);
+      const st = error?.response?.status;
+      let detail = "";
+      // Si le serveur a renvoyé une erreur JSON dans un blob, on la lit.
+      try {
+        if (error?.response?.data instanceof Blob) {
+          const texte = await error.response.data.text();
+          detail = texte.slice(0, 160);
+        }
+      } catch (_) {
+        /* ignore */
+      }
+      const urlAppel = `${API_BASE_URL}/api/admin/caisse/export/`;
+      alert(
+        "Téléchargement impossible.\n" +
+          (st ? `Code : ${st}\n` : `Erreur réseau : ${error?.message || "inconnue"}\n`) +
+          (detail ? `Détail : ${detail}\n` : "") +
+          `URL appelée : ${urlAppel}`
+      );
     }
   }
 
