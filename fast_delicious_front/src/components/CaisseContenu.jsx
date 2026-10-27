@@ -68,9 +68,11 @@ export default function CaisseContenu() {
       // On exporte la même période/date que celle affichée.
       // Le paramètre _t (horodatage) force une requête unique → jamais servie depuis le cache.
       const params = dateJour ? `date=${dateJour}` : `periode=${periode}`;
+      // Pas d'en-tête personnalisé (ex. Cache-Control) : il déclencherait un preflight CORS
+      // que le backend n'autorise pas. Le paramètre _t suffit à éviter le cache.
       const res = await client.get(
         `admin/caisse/export/?${params}&fmt=${format}&_t=${Date.now()}`,
-        { responseType: "blob", headers: { "Cache-Control": "no-cache" } }
+        { responseType: "blob" }
       );
       const url = URL.createObjectURL(res.data);
       const a = document.createElement("a");
