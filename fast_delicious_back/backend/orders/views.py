@@ -345,7 +345,8 @@ class ExportCaisseView(APIView):
     """GET /api/admin/caisse/export/?format=pdf|xlsx&periode=...&date=YYYY-MM-DD&lieu=<id>
     Rapport de caisse téléchargeable (résumé + répartition paiement + liste des ventes)."""
 
-    permission_classes = [EstAdmin]
+    # Admin ET caissière : la caissière doit pouvoir télécharger le rapport du jour depuis le mobile.
+    permission_classes = [EstAdmin | EstCaissiere]
 
     def get(self, request):
         periode = request.query_params.get("periode", "jour")
