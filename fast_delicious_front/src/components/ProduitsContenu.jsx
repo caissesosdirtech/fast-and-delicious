@@ -165,7 +165,7 @@ export default function ProduitsContenu() {
       ) : vue === "grille" ? (
         <div className="produits-grid">
           {platsFiltres.map((p) => {
-            const img = p.image || photoLocalePlat(p.nom);
+            const img = photoLocalePlat(p.nom) || p.image;
             return (
               <div className="produit-card" key={p.id}>
                 <div className="produit-card-img">
@@ -219,7 +219,7 @@ export default function ProduitsContenu() {
 
             <tbody>
               {platsFiltres.map((p) => {
-                const img = p.image || photoLocalePlat(p.nom);
+                const img = photoLocalePlat(p.nom) || p.image;
                 return (
                   <tr key={p.id}>
                     <td>

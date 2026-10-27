@@ -54,8 +54,8 @@ function PlatVitrine({ plat, catIcon, delai }) {
       style={{ transitionDelay: `${delai}s` }}
     >
       <div className="vitrine-card-img">
-        {plat.image || photoLocalePlat(plat.nom) ? (
-          <img src={plat.image || photoLocalePlat(plat.nom)} alt={plat.nom} loading="lazy" />
+        {photoLocalePlat(plat.nom) || plat.image ? (
+          <img src={photoLocalePlat(plat.nom) || plat.image} alt={plat.nom} loading="lazy" />
         ) : (
           <span aria-hidden="true">{catIcon}</span>
         )}
@@ -141,7 +141,7 @@ export default function MenuVitrine() {
           </div>
           <div className="vitrine-formules-row">
             {formulesPosters.map((plat) => {
-              const poster = plat.image || photoLocalePlat(plat.nom);
+              const poster = photoLocalePlat(plat.nom) || plat.image;
               return (
                 <div className="vitrine-formule" key={plat.id}>
                   {poster ? (

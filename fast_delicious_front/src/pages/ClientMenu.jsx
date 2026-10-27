@@ -313,8 +313,8 @@ export default function ClientMenu() {
                   <div className="formule-vitrine-ruban" aria-hidden="true">FORMULE</div>
 
                   <div className="formule-vitrine-media">
-                    {plat.image || photoLocalePlat(plat.nom) ? (
-                      <img src={plat.image || photoLocalePlat(plat.nom)} alt={plat.nom} loading="lazy" />
+                    {photoLocalePlat(plat.nom) || plat.image ? (
+                      <img src={photoLocalePlat(plat.nom) || plat.image} alt={plat.nom} loading="lazy" />
                     ) : (
                       <span aria-hidden="true">🍱</span>
                     )}
@@ -379,7 +379,7 @@ export default function ClientMenu() {
           <div className="formules-row">
             {formulesPosters.map((plat) => {
               const quantite = quantitePourPlat(plat.id);
-              const poster = plat.image || photoLocalePlat(plat.nom);
+              const poster = photoLocalePlat(plat.nom) || plat.image;
               return (
                 <div className="formule-poster" key={plat.id}>
                   <div className="formule-poster-media">
@@ -460,8 +460,8 @@ export default function ClientMenu() {
                   return (
                     <div className={`plat-card${quantite > 0 ? " in-cart" : ""}`} key={plat.id}>
                       <div className="plat-thumb">
-                        {plat.image || photoLocalePlat(plat.nom) ? (
-                          <img src={plat.image || photoLocalePlat(plat.nom)} alt={plat.nom} loading="lazy" />
+                        {photoLocalePlat(plat.nom) || plat.image ? (
+                          <img src={photoLocalePlat(plat.nom) || plat.image} alt={plat.nom} loading="lazy" />
                         ) : (
                           <span className="plat-thumb-fallback" aria-hidden="true">
                             {iconePourCategorie(cat.nom)}
