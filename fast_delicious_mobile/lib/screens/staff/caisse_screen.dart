@@ -46,6 +46,7 @@ class _CaisseScreenState extends State<CaisseScreen> {
   List<Map<String, dynamic>>? _historiqueRecent;
   Commande? _selectionnee;
   bool _exportEnCours = false;
+  String _periodeExport = 'jour'; // jour | semaine | mois | annee (comme le web)
   final Map<int, bool> _enTraitement = {};
   final _ws = WebSocketService();
   Timer? _timer;
@@ -170,25 +171,46 @@ class _CaisseScreenState extends State<CaisseScreen> {
     try {
       final res = await ApiClient().dio.get(
         'admin/caisse/export/',
-        queryParameters: {'format': format, 'periode': 'jour'},
+        queryParameters: {'fmt': format, 'periode': _periodeExport},
         options: Options(responseType: ResponseType.bytes),
       );
       final bytes = (res.data as List).cast<int>();
       final dossier = Directory.systemTemp.createTempSync('caisse');
       final ext = format == 'xlsx' ? 'xlsx' : 'pdf';
-      final chemin = '${dossier.path}/rapport_caisse_du_jour.$ext';
+      final chemin = '${dossier.path}/rapport_caisse_$_periodeExport.$ext';
       await File(chemin).writeAsBytes(bytes);
-      await Share.shareXFiles([XFile(chemin)], subject: 'Rapport de caisse du jour');
+      await Share.shareXFiles([XFile(chemin)], subject: 'Rapport de caisse ($_periodeExport)');
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Téléchargement impossible.'), backgroundColor: AppColors.red),
-        );
-      }
+      // Affiche le vrai code HTTP / message serveur (au lieu d'un texte générique),
+      // pour pouvoir diagnostiquer. _afficherErreur gère proprement les DioException.
+      _afficherErreur(e);
     } finally {
       if (mounted) setState(() => _exportEnCours = false);
     }
   }
+
+  /// Puce de sélection de période (Jour / Semaine / Mois / Année), comme sur le web.
+  Widget _chipPeriode(String valeur, String label) {
+    final actif = _periodeExport == valeur;
+    return ChoiceChip(
+      label: Text(label),
+      selected: actif,
+      onSelected: _exportEnCours ? null : (_) => setState(() => _periodeExport = valeur),
+      selectedColor: AppColors.gold,
+      backgroundColor: AppColors.cream2,
+      side: BorderSide(color: actif ? AppColors.gold : AppColors.line),
+      labelStyle: TextStyle(
+        color: actif ? Colors.white : AppColors.ink,
+        fontWeight: FontWeight.w600,
+        fontSize: 12.5,
+      ),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  static const Map<String, String> _labelsPeriode = {
+    'jour': 'du jour', 'semaine': 'de la semaine', 'mois': 'du mois', 'annee': "de l'année",
+  };
 
   /// Renvoie l'action principale à proposer selon le statut, ou null si la
   /// commande est terminée / annulée (plus d'action de progression).
@@ -302,12 +324,24 @@ class _CaisseScreenState extends State<CaisseScreen> {
               children: [
                 Row(
                   children: [
-                    const Expanded(child: Text('Rapport de caisse du jour', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13))),
+                    Expanded(child: Text('Rapport de caisse ${_labelsPeriode[_periodeExport] ?? ''}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13))),
                     if (_exportEnCours)
                       const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                   ],
                 ),
                 const SizedBox(height: 10),
+                // Sélection de la période à exporter (comme le web)
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _chipPeriode('jour', 'Jour'),
+                    _chipPeriode('semaine', 'Semaine'),
+                    _chipPeriode('mois', 'Mois'),
+                    _chipPeriode('annee', 'Année'),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
