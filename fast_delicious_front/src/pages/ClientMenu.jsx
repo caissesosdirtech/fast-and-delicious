@@ -209,6 +209,7 @@ export default function ClientMenu() {
         <BandeauDefilant texte="🍽️ PAIEMENT ESPÈCES / WAVE / ORANGE MONEY — LIVRAISON DISPONIBLE — RETRAIT SUR PLACE 🍽️" />
 
         <div className="menu-banner-content">
+          <div className="menu-hero-eyebrow">DAKAR 2026 <span aria-hidden="true">»»»»»»</span></div>
           <h1 className="menu-hero-title font-display">Notre menu</h1>
           <p className="menu-hero-sub">Compose ta commande — <strong>{totalPlats} plats</strong> t'attendent au marché.</p>
 
