@@ -253,9 +253,10 @@
 }
 .plat-card.in-cart{ border-color:var(--green); box-shadow:0 8px 20px rgba(61,138,79,.18); }
 
-/* Ratio proche des affiches Fast Food (~0.8) → nom + prix de l'affiche restent visibles */
-.plat-thumb{ position:relative; aspect-ratio:4/5; background:var(--cream-2); }
-.plat-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* Hauteur modérée : les petites photos (basse résolution) restent nettes.
+   object-position:top garde le NOM des affiches (en haut) visible. */
+.plat-thumb{ position:relative; height:132px; background:var(--cream-2); }
+.plat-thumb img{ width:100%; height:100%; object-fit:cover; object-position:top; display:block; }
 .plat-thumb-fallback{ display:flex; align-items:center; justify-content:center; height:100%; font-size:40px; }
 /* L'ancien overlay texte sur l'image est masqué (texte affiché proprement en dessous) */
 .plat-thumb-overlay{ display:none !important; }
@@ -314,7 +315,7 @@
 /* ===================== RESPONSIVE ===================== */
 @media (min-width:720px){
   .menu-grid{ grid-template-columns:repeat(3, 1fr); }
-  .plat-thumb{ aspect-ratio:4/5; }
+  .plat-thumb{ height:150px; }
 }
 @media (min-width:1040px){
   .menu-grid{ grid-template-columns:repeat(4, 1fr); }
