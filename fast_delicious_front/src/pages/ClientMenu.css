@@ -155,13 +155,14 @@
   .formules-hero, .formules-hero-eyebrow, .formules-row .formule-poster{ animation:none !important; }
 }
 
-.formules-row{ display:flex; gap:12px; padding:0 20px 6px; overflow-x:auto; scroll-snap-type:x mandatory;
-  width:fit-content; max-width:100%; margin:0 auto; }
+/* Les 3 formules se partagent la largeur : toutes visibles, sans barre de défilement. */
+.formules-row{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; padding:0 16px 6px;
+  max-width:600px; margin:0 auto; }
 .formule-poster{
-  flex:0 0 185px; scroll-snap-align:start; border-radius:16px; overflow:hidden; position:relative;
+  border-radius:16px; overflow:hidden; position:relative;
   background:#fff; box-shadow:0 10px 22px rgba(0,0,0,.14); display:flex; flex-direction:column;
 }
-.formule-poster-media{ position:relative; height:240px; background:var(--cream-2); }
+.formule-poster-media{ position:relative; aspect-ratio:3/4; background:var(--cream-2); }
 .formule-poster-media img{ width:100%; height:100%; object-fit:cover; display:block; }
 .formule-poster-media > span{ display:flex; align-items:center; justify-content:center; height:100%; font-size:46px; }
 .formule-poster-btn{
