@@ -86,7 +86,7 @@
 .menu-banner-vague{ position:absolute; left:0; right:0; bottom:-1px; width:100%; height:42px; z-index:1; }
 
 /* ===================== FORMULES (composées) ===================== */
-.formule-section{ padding:22px 16px 4px; }
+.formule-section{ padding:22px 16px 4px; max-width:1100px; margin:0 auto; }
 .formule-section-head{ margin-bottom:12px; }
 .formule-section-eyebrow{ color:var(--red); font-weight:900; font-size:10.5px; letter-spacing:1.4px; }
 .formule-section-head h2{ font-size:22px; margin-top:2px; }
@@ -122,7 +122,7 @@
 .accompagnement-erreur{ color:var(--red-dim); font-size:12px; font-weight:700; margin-top:6px; }
 
 /* ===================== FORMULES (affiches) ===================== */
-.formules-hero{ padding:24px 0 6px; }
+.formules-hero{ padding:24px 0 6px; max-width:1100px; margin:0 auto; }
 .formules-hero-head{ padding:0 20px 12px; }
 .formules-hero-eyebrow{ color:var(--red); font-weight:900; font-size:10.5px; letter-spacing:1.4px; }
 .formules-hero-head h2{ font-size:22px; margin-top:2px; }
@@ -152,7 +152,7 @@
 
 /* ===================== NAV CATÉGORIES (pills) ===================== */
 .rubrique-nav{ position:sticky; top:0; z-index:20; background:var(--cream); padding:14px 0 8px; }
-.rubrique-nav-inner{ display:flex; gap:9px; padding:0 16px; overflow-x:auto; scrollbar-width:none; }
+.rubrique-nav-inner{ display:flex; gap:9px; padding:0 16px; overflow-x:auto; scrollbar-width:none; max-width:1100px; margin:0 auto; }
 .rubrique-nav-inner::-webkit-scrollbar{ display:none; }
 .rubrique-nav button{
   flex:0 0 auto; display:flex; align-items:center; gap:6px; background:#fff; color:var(--ink);
@@ -165,7 +165,7 @@
 .rubrique-nav button.active .rubrique-nav-count{ background:rgba(255,255,255,.22); }
 
 /* ===================== SECTIONS / STANDS ===================== */
-.menu-content{ padding:6px 16px 20px; }
+.menu-content{ padding:6px 16px 20px; max-width:1100px; margin:0 auto; }
 .stand{ margin-top:18px; }
 .stand-enseigne{ display:flex; align-items:center; gap:10px; padding:4px 2px 14px; }
 .stand-enseigne-icon{ font-size:24px; }
