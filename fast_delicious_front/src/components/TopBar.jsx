@@ -16,7 +16,7 @@ export default function TopBar() {
 
       <div className="topbar-right">
         {!utilisateur && (
-          <Link to="/menu" className="topbar-vitrine-link">📖 Voir le menu</Link>
+          <Link to="/" className="topbar-vitrine-link">🛍️ Commander</Link>
         )}
         {!utilisateur && (
           <button className="cart-btn" onClick={() => setPanierOuvert(true)} aria-label="Ouvrir le panier">
