@@ -292,6 +292,7 @@ export default function ClientMenu() {
           )}
         </div>
 
+        <img className="menu-banner-mascotte menu-banner-mascotte-left" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
         <img className="menu-banner-mascotte" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
 
         <svg className="menu-banner-vague" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">

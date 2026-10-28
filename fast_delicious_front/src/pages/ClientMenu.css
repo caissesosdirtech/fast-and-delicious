@@ -33,20 +33,44 @@
 .menu-banner-content{ position:relative; z-index:2; max-width:640px; margin:0 auto; padding-right:92px; }
 
 /* Mascotte officielle DAKAR 2026, à droite, fondue dans la bande (masque dégradé à gauche) */
+/* Masque radial : le fond vert de l'image se fond de tous les côtés (pas de rectangle visible) */
 .menu-banner-mascotte{
-  position:absolute; right:-18px; bottom:0; height:238px; z-index:1; pointer-events:none;
-  -webkit-mask-image:linear-gradient(to left,#000 66%,transparent 100%);
-          mask-image:linear-gradient(to left,#000 66%,transparent 100%);
+  position:absolute; right:-10px; bottom:0; height:262px; z-index:1; pointer-events:none;
+  -webkit-mask-image:radial-gradient(ellipse 72% 86% at 50% 60%, #000 56%, transparent 100%);
+          mask-image:radial-gradient(ellipse 72% 86% at 50% 60%, #000 56%, transparent 100%);
+  animation:mascRebond .9s cubic-bezier(.34,1.56,.64,1) both;
+}
+/* Deuxième mascotte à gauche (affichée sur grand écran) */
+.menu-banner-mascotte-left{
+  left:-10px; right:auto; display:none;
+}
+@keyframes mascRebond{
+  0%{ transform:translateY(60px); opacity:0; }
+  55%{ opacity:1; }
+  100%{ transform:translateY(0); opacity:1; }
+}
+@media (prefers-reduced-motion: reduce){
+  .menu-banner-mascotte{ animation:none; }
+}
+/* Grand écran : une mascotte de chaque côté, plus grandes */
+@media (min-width:760px){
+  .menu-banner{ min-height:322px; }
+  .menu-banner-content{ padding-right:0; }
+  .menu-banner-mascotte{ height:300px; right:18px; }
+  .menu-banner-mascotte-left{ display:block; height:300px; left:18px; right:auto; }
+}
+@media (min-width:1100px){
+  .menu-banner{ min-height:352px; }
+  .menu-banner-mascotte{ height:332px; right:40px; }
+  .menu-banner-mascotte-left{ height:332px; left:40px; right:auto; }
 }
 @media (max-width:560px){
-  .menu-banner-content{ padding-right:70px; }
-  .menu-banner-mascotte{ height:176px; right:-26px;
-    -webkit-mask-image:linear-gradient(to left,#000 74%,transparent 100%);
-            mask-image:linear-gradient(to left,#000 74%,transparent 100%); }
+  .menu-banner-content{ padding-right:72px; }
+  .menu-banner-mascotte{ height:192px; right:-18px; }
 }
 @media (max-width:380px){
   .menu-banner-content{ padding-right:58px; }
-  .menu-banner-mascotte{ height:156px; right:-28px; }
+  .menu-banner-mascotte{ height:168px; right:-20px; }
 }
 .menu-hero-eyebrow{ font-weight:900; font-size:15px; letter-spacing:2px; color:#fff; display:flex; align-items:center; gap:8px; }
 .menu-hero-eyebrow span{ color:var(--gold); font-size:12px; letter-spacing:1px; }
