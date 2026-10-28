@@ -292,6 +292,8 @@ export default function ClientMenu() {
           )}
         </div>
 
+        <img className="menu-banner-mascotte" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
+
         <svg className="menu-banner-vague" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0,32 C 240,64 480,0 720,20 S 1200,64 1440,28 L1440,60 L0,60 Z" fill="var(--cream)" />
         </svg>

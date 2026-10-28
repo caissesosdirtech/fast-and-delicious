@@ -130,6 +130,7 @@ export default function MenuVitrine() {
       <div className="vitrine-hero">
         <h1 className="font-display">Notre menu complet</h1>
         <p>{totalPlats} plats répartis en {categories.length} rubriques — tout ce que propose notre cuisine.</p>
+        <img className="vitrine-hero-mascotte" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
       </div>
 
       {/* Vitrine spéciale "Nos formules" — affiches toutes faites */}

@@ -8,20 +8,34 @@
 
 /* ---------- Hero ---------- */
 .vitrine-hero{
-  text-align:center; padding:50px 0 34px;
+  position:relative; overflow:hidden; text-align:left; min-height:168px;
+  background:linear-gradient(160deg,#0E4531 0%, #073A22 55%, #02311D 100%);
+  color:#fff; padding:26px 20px 30px; padding-right:84px;
+  border-radius:0 0 26px 26px; margin-bottom:14px;
 }
 .vitrine-hero h1{
-  font-size:34px; margin:14px 0 10px;
-  background:linear-gradient(90deg, var(--ink), var(--red-dim), var(--ink));
-  background-size:200% 100%;
-  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-  animation:vitrine-title-shine 5s linear infinite;
+  font-size:32px; margin:0 0 8px; color:#fff;
+  background:none; -webkit-text-fill-color:#fff; animation:none;
+  position:relative; z-index:2;
 }
-@keyframes vitrine-title-shine{
-  0%{ background-position:0% 50%; }
-  100%{ background-position:200% 50%; }
+.vitrine-hero p{ font-size:13.5px; color:#d8e6dd; margin:0; position:relative; z-index:2; }
+
+/* Mascotte officielle DAKAR 2026 sur la bande verte de la vitrine (comme la page Commande) */
+.vitrine-hero-mascotte{
+  position:absolute; right:-18px; bottom:0; height:158px; z-index:1; pointer-events:none;
+  -webkit-mask-image:linear-gradient(to left,#000 70%,transparent 100%);
+          mask-image:linear-gradient(to left,#000 70%,transparent 100%);
 }
-.vitrine-hero p{ font-size:14.5px; color:var(--ink-soft); margin:0 0 18px; }
+@media (max-width:560px){
+  .vitrine-hero{ padding-right:66px; }
+  .vitrine-hero-mascotte{ height:152px; right:-24px;
+    -webkit-mask-image:linear-gradient(to left,#000 74%,transparent 100%);
+            mask-image:linear-gradient(to left,#000 74%,transparent 100%); }
+}
+@media (max-width:380px){
+  .vitrine-hero{ padding-right:54px; min-height:150px; }
+  .vitrine-hero-mascotte{ height:134px; right:-26px; }
+}
 
 .appel-commande{
   display:inline-flex; align-items:center; gap:6px;

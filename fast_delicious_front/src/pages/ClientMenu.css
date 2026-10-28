@@ -23,15 +23,31 @@
 /* ===================== HERO ===================== */
 .menu-banner{
   position:relative;
-  background:
-    radial-gradient(120% 90% at 85% -10%, rgba(232,166,59,.28), transparent 60%),
-    linear-gradient(160deg,#0E4531,var(--vert-fonce2));
+  /* Vert accordé à l'image de la mascotte pour qu'elle fusionne avec la bande */
+  background:linear-gradient(160deg,#0E4531 0%, #073A22 55%, #02311D 100%);
   color:#fff;
   padding:22px 20px 34px;
   border-radius:0 0 26px 26px;
   overflow:hidden;
 }
-.menu-banner-content{ position:relative; z-index:2; max-width:640px; margin:0 auto; }
+.menu-banner-content{ position:relative; z-index:2; max-width:640px; margin:0 auto; padding-right:92px; }
+
+/* Mascotte officielle DAKAR 2026, à droite, fondue dans la bande (masque dégradé à gauche) */
+.menu-banner-mascotte{
+  position:absolute; right:-18px; bottom:0; height:238px; z-index:1; pointer-events:none;
+  -webkit-mask-image:linear-gradient(to left,#000 66%,transparent 100%);
+          mask-image:linear-gradient(to left,#000 66%,transparent 100%);
+}
+@media (max-width:560px){
+  .menu-banner-content{ padding-right:70px; }
+  .menu-banner-mascotte{ height:176px; right:-26px;
+    -webkit-mask-image:linear-gradient(to left,#000 74%,transparent 100%);
+            mask-image:linear-gradient(to left,#000 74%,transparent 100%); }
+}
+@media (max-width:380px){
+  .menu-banner-content{ padding-right:58px; }
+  .menu-banner-mascotte{ height:156px; right:-28px; }
+}
 .menu-hero-eyebrow{ font-weight:900; font-size:15px; letter-spacing:2px; color:#fff; display:flex; align-items:center; gap:8px; }
 .menu-hero-eyebrow span{ color:var(--gold); font-size:12px; letter-spacing:1px; }
 .menu-hero-title{
