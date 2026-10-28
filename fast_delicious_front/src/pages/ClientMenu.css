@@ -202,8 +202,9 @@
   border-radius:16px; overflow:hidden; position:relative;
   background:#fff; box-shadow:0 10px 22px rgba(0,0,0,.14); display:flex; flex-direction:column;
 }
-.formule-poster-media{ position:relative; aspect-ratio:3/4; background:var(--cream-2); }
-.formule-poster-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* Ratio = celui des affiches de formules (~0.59) → l'en-tête « FORMULE » reste visible */
+.formule-poster-media{ position:relative; aspect-ratio:59/100; background:var(--cream-2); }
+.formule-poster-media img{ width:100%; height:100%; object-fit:cover; object-position:top; display:block; }
 .formule-poster-media > span{ display:flex; align-items:center; justify-content:center; height:100%; font-size:46px; }
 .formule-poster-btn{
   border:none; background:var(--vert-fonce); color:#fff; font-weight:800; font-size:12px;
@@ -252,7 +253,8 @@
 }
 .plat-card.in-cart{ border-color:var(--green); box-shadow:0 8px 20px rgba(61,138,79,.18); }
 
-.plat-thumb{ position:relative; height:120px; background:var(--cream-2); }
+/* Ratio proche des affiches Fast Food (~0.8) → nom + prix de l'affiche restent visibles */
+.plat-thumb{ position:relative; aspect-ratio:4/5; background:var(--cream-2); }
 .plat-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
 .plat-thumb-fallback{ display:flex; align-items:center; justify-content:center; height:100%; font-size:40px; }
 /* L'ancien overlay texte sur l'image est masqué (texte affiché proprement en dessous) */
@@ -312,7 +314,7 @@
 /* ===================== RESPONSIVE ===================== */
 @media (min-width:720px){
   .menu-grid{ grid-template-columns:repeat(3, 1fr); }
-  .plat-thumb{ height:150px; }
+  .plat-thumb{ aspect-ratio:4/5; }
 }
 @media (min-width:1040px){
   .menu-grid{ grid-template-columns:repeat(4, 1fr); }
