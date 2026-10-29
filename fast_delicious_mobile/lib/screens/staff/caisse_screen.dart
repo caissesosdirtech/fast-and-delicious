@@ -19,6 +19,7 @@ import '../../widgets/dialogue_annulation.dart';
 import '../../widgets/clients_contenu.dart';
 import '../../widgets/parametres_contenu.dart';
 import '../../widgets/ticket_detail.dart';
+import 'vente_directe_screen.dart';
 
 class CaisseScreen extends StatefulWidget {
   const CaisseScreen({super.key});
@@ -164,6 +165,15 @@ class _CaisseScreenState extends State<CaisseScreen> {
 
   void _ouvrirRecu(Commande cmd) => ouvrirTicketDetail(context, cmd.toTicketMap());
 
+  /// Ouvre l'écran de vente au comptoir, puis rafraîchit les données au retour
+  /// (une vente directe crée une commande à faire apparaître dans les stats).
+  Future<void> _ouvrirVenteDirecte() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const VenteDirecteScreen()),
+    );
+    if (mounted) _charger(silencieux: true);
+  }
+
   /// Télécharge le rapport de caisse du jour (PDF ou Excel) et ouvre le partage
   /// (enregistrer dans Fichiers, envoyer par WhatsApp/mail, etc.).
   Future<void> _exporter(String format) async {
@@ -239,9 +249,15 @@ class _CaisseScreenState extends State<CaisseScreen> {
         SidebarItem('🕓', 'Historique'),
         SidebarItem('👥', 'Clients'),
         SidebarItem('⚙️', 'Paramètres'),
+        SidebarItem('🛒', 'Vente directe'),
       ],
       indexActif: _rubrique,
       onChangerIndex: (i) {
+        // "Vente directe" (dernier élément) ouvre un écran dédié, sans changer la rubrique active.
+        if (i == 6) {
+          _ouvrirVenteDirecte();
+          return;
+        }
         setState(() => _rubrique = i);
         if (i == 2 && _paiementsRecents == null) _chargerPaiementsRecents();
         if (i == 3 && _historiqueRecent == null) _chargerHistoriqueRecent();
@@ -290,6 +306,61 @@ class _CaisseScreenState extends State<CaisseScreen> {
     }
   }
 
+  /// Grand bouton d'accès rapide à la vente au comptoir, en tête du tableau de bord.
+  Widget _boutonVenteDirecte() {
+    return Material(
+      borderRadius: BorderRadius.circular(16),
+      elevation: 3,
+      shadowColor: AppColors.greenDim.withOpacity(0.4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: _ouvrirVenteDirecte,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF0E4531), Color(0xFF0A6B41), Color(0xFF12A05C)],
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(Icons.point_of_sale, color: Colors.white, size: 26),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Vente directe',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17)),
+                    SizedBox(height: 2),
+                    Text('Encaisser un client au comptoir',
+                        style: TextStyle(color: Colors.white70, fontSize: 12.5)),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward, color: Colors.white, size: 22),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTableauDeBord() {
     final s = _stats!;
     final commandesParStatut = Map<String, dynamic>.from(s['commandes_par_statut']);
@@ -301,6 +372,8 @@ class _CaisseScreenState extends State<CaisseScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _boutonVenteDirecte(),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 12, runSpacing: 12,
             children: [
