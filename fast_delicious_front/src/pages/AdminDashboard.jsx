@@ -4,6 +4,7 @@ import StaffSidebar from "../components/StaffSidebar";
 import EmptyState from "../components/EmptyState";
 import TicketModal from "../components/TicketModal";
 import ProduitsContenu from "../components/ProduitsContenu";
+import VenteDirecteContenu from "../components/VenteDirecteContenu";
 import CaisseContenu from "../components/CaisseContenu";
 import CategoriesContenu from "../components/CategoriesContenu";
 import TablesContenu from "../components/TablesContenu";
@@ -39,6 +40,7 @@ const COULEUR_STATUT = {
 const ITEMS_SIDEBAR = [
   { icone: "📊", label: "Dashboard" },
   { icone: "💰", label: "État de la caisse" },
+  { icone: "🛒", label: "Vente directe" },
   { icone: "🍔", label: "Produits" },
   { icone: "🏷️", label: "Catégories" },
   { icone: "🍽️", label: "Tables" },
@@ -847,27 +849,30 @@ export default function AdminDashboard() {
       return <CaisseContenu />;
 
     case 2:
-      return <ProduitsContenu />;
+      return <VenteDirecteContenu />;
 
     case 3:
-      return <CategoriesContenu />;
+      return <ProduitsContenu />;
 
     case 4:
-      return <TablesContenu />;
+      return <CategoriesContenu />;
 
     case 5:
-      return <LieuxContenu />;
+      return <TablesContenu />;
 
     case 6:
-      return <EmployesContenu />;
+      return <LieuxContenu />;
 
     case 7:
-      return <CommandesContenu />;
+      return <EmployesContenu />;
 
     case 8:
-      return contenuTableauDeBord();
+      return <CommandesContenu />;
 
     case 9:
+      return contenuTableauDeBord();
+
+    case 10:
       return <ParametresContenu />;
 
     default:

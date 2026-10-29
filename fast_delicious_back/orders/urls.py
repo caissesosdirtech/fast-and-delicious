@@ -11,6 +11,7 @@ urlpatterns = [
 
     # Caisse
     path("caisse/commandes/", views.FileAttenteCaisseView.as_view(), name="caisse-file"),
+    path("caisse/vente-directe/", views.VenteDirecteView.as_view(), name="caisse-vente-directe"),
     path("caisse/commandes/<int:pk>/encaisser/", views.EncaisserCommandeView.as_view(), name="caisse-encaisser"),
     path("caisse/commandes/<int:pk>/valider/", views.ValiderCommandeView.as_view(), name="caisse-valider"),
     path("caisse/commandes/<int:pk>/prete/", views.MarquerPreteView.as_view(), name="caisse-prete"),

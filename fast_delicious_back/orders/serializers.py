@@ -165,3 +165,57 @@ class CommandeCreationSerializer(serializers.ModelSerializer):
                 )
         commande.enregistrer_historique()
         return commande
+
+
+class VenteDirecteSerializer(serializers.Serializer):
+    """Vente au comptoir (POS) : crée une commande déjà encaissée ET servie, en un seul appel.
+    Utilisée quand un client achète directement à la caisse, sans passer par la commande en ligne.
+    """
+
+    lignes = LigneCommandeEcritureSerializer(many=True)
+    numero_table = serializers.CharField(required=False, allow_blank=True, default="")
+    mode_paiement = serializers.ChoiceField(
+        choices=Commande.ModePaiement.choices,
+        required=False,
+        default=Commande.ModePaiement.ESPECES,
+    )
+    reference_paiement = serializers.CharField(required=False, allow_blank=True, default="")
+
+    def validate_lignes(self, value):
+        if not value:
+            raise serializers.ValidationError("La vente doit contenir au moins un article.")
+        return value
+
+    def create(self, validated_data):
+        from django.utils import timezone
+
+        request = self.context["request"]
+        utilisateur = request.user if request.user.is_authenticated else None
+        lignes_data = validated_data.pop("lignes")
+        maintenant = timezone.now()
+
+        commande = Commande.objects.create(
+            caissiere=utilisateur,
+            numero_table=(validated_data.get("numero_table") or "Comptoir")[:10],
+            mode_commande=Commande.ModeCommande.SUR_PLACE,
+            mode_paiement=validated_data.get("mode_paiement") or Commande.ModePaiement.ESPECES,
+            reference_paiement=validated_data.get("reference_paiement", ""),
+            paiement_confirme=True,
+            statut=Commande.Statut.SERVIE,
+            date_validation=maintenant,
+            date_prete=maintenant,
+            date_servie=maintenant,
+        )
+
+        for ligne_data in lignes_data:
+            selections_data = ligne_data.pop("selections", [])
+            ligne = LigneCommande.objects.create(commande=commande, **ligne_data)
+            for selection in selections_data:
+                SelectionChoix.objects.create(
+                    ligne=ligne,
+                    groupe=selection["groupe"],
+                    option=selection["option"],
+                )
+
+        commande.enregistrer_historique()
+        return commande

@@ -12,7 +12,7 @@ from realtime.utils import notifier_caisse, notifier_client, notifier_cuisine, n
 
 from .models import Commande, LigneCommande
 from .permissions import EstAdmin, EstCaissiere, EstCuisinier, EstLivreur, EstPersonnelInterne
-from .serializers import CommandeCreationSerializer, CommandeSerializer
+from .serializers import CommandeCreationSerializer, CommandeSerializer, VenteDirecteSerializer
 
 
 class CommandeCreationView(generics.CreateAPIView):
@@ -866,3 +866,20 @@ class ExportCaisseView(APIView):
         resp = HttpResponse(buf.read(), content_type="application/pdf")
         resp["Content-Disposition"] = f'attachment; filename="caisse_{date_fin.isoformat()}.pdf"'
         return resp
+
+
+class VenteDirecteView(APIView):
+    """POST /api/caisse/vente-directe/ — vente au comptoir.
+
+    Crée une commande déjà encaissée et servie (statut SERVIE, paiement confirmé),
+    en un seul appel : le client achète directement à la caisse sans commande en ligne.
+    Accessible à la caissière et à l'admin.
+    """
+
+    permission_classes = [EstCaissiere]
+
+    def post(self, request):
+        serializer = VenteDirecteSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        commande = serializer.save()
+        return Response(CommandeSerializer(commande).data, status=status.HTTP_201_CREATED)
