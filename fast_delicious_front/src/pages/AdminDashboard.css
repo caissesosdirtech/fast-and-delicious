@@ -171,3 +171,68 @@
 /* Badge "site/lieu" sur une commande (multi-événements) */
 .cmd-lieu{ font-size:11px; font-weight:700; color:#8a6214; background:rgba(232,166,59,.16);
   padding:2px 8px; border-radius:9px; }
+
+/* ============================================================
+ * Bouton d'accès rapide "Vente directe" (tableau de bord)
+ * ============================================================ */
+.vd-cta-zone{
+  display:flex;
+  margin: 2px 0 18px;
+}
+.vd-cta{
+  display:inline-flex;
+  align-items:center;
+  gap:16px;
+  border:none;
+  cursor:pointer;
+  text-align:left;
+  padding:16px 22px 16px 18px;
+  border-radius:18px;
+  color:#fff;
+  background:linear-gradient(135deg,#0E4531 0%, #0A6B41 55%, #12A05C 100%);
+  box-shadow:0 10px 26px rgba(10,107,65,.38), inset 0 1px 0 rgba(255,255,255,.12);
+  position:relative;
+  overflow:hidden;
+  transition:transform .14s ease, box-shadow .14s ease;
+}
+.vd-cta::after{
+  /* reflet animé qui balaie le bouton */
+  content:"";
+  position:absolute; top:0; left:-60%;
+  width:40%; height:100%;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent);
+  transform:skewX(-18deg);
+  animation:vdShine 3.6s ease-in-out infinite;
+}
+@keyframes vdShine{
+  0%, 60% { left:-60%; }
+  100% { left:130%; }
+}
+.vd-cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 32px rgba(10,107,65,.5), inset 0 1px 0 rgba(255,255,255,.18);
+}
+.vd-cta:active{ transform:translateY(0) scale(.99); }
+
+.vd-cta-icone{
+  font-size:26px;
+  width:48px; height:48px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.16);
+  border-radius:14px;
+  flex-shrink:0;
+}
+.vd-cta-texte{ display:flex; flex-direction:column; line-height:1.2; }
+.vd-cta-titre{ font-size:18px; font-weight:800; letter-spacing:.2px; }
+.vd-cta-sous{ font-size:12.5px; opacity:.85; margin-top:2px; }
+.vd-cta-fleche{
+  font-size:22px; font-weight:800;
+  margin-left:6px;
+  transition:transform .14s ease;
+}
+.vd-cta:hover .vd-cta-fleche{ transform:translateX(4px); }
+
+@media (max-width:560px){
+  .vd-cta{ width:100%; }
+  .vd-cta-sous{ display:none; }
+}

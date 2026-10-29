@@ -792,6 +792,21 @@ export default function AdminDashboard() {
           🟢 Données du jour — <strong>{dateLisible(stats.date || "")}</strong>
         </div>
 
+        <div className="vd-cta-zone">
+          <button
+            type="button"
+            className="vd-cta"
+            onClick={() => setRubrique(2)}
+          >
+            <span className="vd-cta-icone" aria-hidden="true">🛒</span>
+            <span className="vd-cta-texte">
+              <span className="vd-cta-titre">Vente directe</span>
+              <span className="vd-cta-sous">Encaisser un client au comptoir</span>
+            </span>
+            <span className="vd-cta-fleche" aria-hidden="true">→</span>
+          </button>
+        </div>
+
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Commandes aujourd'hui</div>
