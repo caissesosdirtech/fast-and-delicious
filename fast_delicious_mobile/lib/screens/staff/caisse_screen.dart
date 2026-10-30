@@ -20,6 +20,7 @@ import '../../widgets/clients_contenu.dart';
 import '../../widgets/parametres_contenu.dart';
 import '../../widgets/ticket_detail.dart';
 import 'vente_directe_screen.dart';
+import 'paiement_en_ligne_screen.dart';
 
 class CaisseScreen extends StatefulWidget {
   const CaisseScreen({super.key});
@@ -164,6 +165,17 @@ class _CaisseScreenState extends State<CaisseScreen> {
   }
 
   void _ouvrirRecu(Commande cmd) => ouvrirTicketDetail(context, cmd.toTicketMap());
+
+  /// Ouvre l'écran de paiement en ligne (QR Wave / Orange Money) pour une commande.
+  /// Rafraîchit la caisse au retour si le paiement a été confirmé.
+  Future<void> _ouvrirPaiement(Commande cmd) async {
+    final paye = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => PaiementEnLigneScreen(commandeId: cmd.id, total: cmd.total),
+      ),
+    );
+    if (paye == true && mounted) _charger(silencieux: true);
+  }
 
   /// Ouvre l'écran de vente au comptoir, puis rafraîchit les données au retour
   /// (une vente directe crée une commande à faire apparaître dans les stats).
@@ -477,6 +489,9 @@ class _CaisseScreenState extends State<CaisseScreen> {
                           if (ap != null)
                             _iconeAction(ap.icone, ap.couleur, ap.label, enTraitement ? null : () => ap.action(cmd.id)),
                           if (ap != null) const SizedBox(width: 6),
+                          if (!cmd.paiementConfirme && _estActive(cmd.statut))
+                            _iconeAction(Icons.qr_code_2, const Color(0xFF0A6B41), 'Paiement en ligne', () => _ouvrirPaiement(cmd)),
+                          if (!cmd.paiementConfirme && _estActive(cmd.statut)) const SizedBox(width: 6),
                           if (_estActive(cmd.statut))
                             _iconeAction(Icons.close, AppColors.red, 'Annuler', enTraitement ? null : () => _annuler(cmd.id)),
                           if (_estActive(cmd.statut)) const SizedBox(width: 6),
@@ -588,6 +603,23 @@ class _CaisseScreenState extends State<CaisseScreen> {
                       child: Text(enTraitement ? '...' : (cmd.paiementConfirme ? '✓ Encaissé' : 'Encaisser')),
                     ),
                   ),
+                  if (!cmd.paiementConfirme) const SizedBox(height: 8),
+                  if (!cmd.paiementConfirme)
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF0A6B41),
+                          side: const BorderSide(color: Color(0xFF0A6B41)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _ouvrirPaiement(cmd);
+                        },
+                        icon: const Icon(Icons.qr_code_2, size: 18),
+                        label: const Text('Paiement en ligne (QR)'),
+                      ),
+                    ),
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
