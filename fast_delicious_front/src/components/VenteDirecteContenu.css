@@ -397,3 +397,30 @@
     position: static;
   }
 }
+
+/* ---------- Rendu de monnaie ---------- */
+.vd-rendu { display:flex; flex-direction:column; gap:6px; }
+.vd-rendu-ok {
+  background:#e9f7ef; color:#0e4531; border:1px solid #bfe6cf;
+  border-radius:10px; padding:10px 12px; font-size:15px; text-align:center;
+}
+.vd-rendu-ok strong { font-size:19px; }
+.vd-rendu-manque {
+  background:#fdecec; color:#c62828; border:1px solid #f3c2c2;
+  border-radius:10px; padding:10px 12px; font-size:15px; text-align:center;
+}
+.vd-rendu-manque strong { font-size:19px; }
+
+/* ---------- Aperçu ticket (modale de confirmation) ---------- */
+.vd-ticket-apercu {
+  width:100%; background:#fafafa; border:1px dashed #d8d8dc; border-radius:12px;
+  padding:14px 16px; margin:8px 0 4px; text-align:left;
+}
+.vd-ticket-l { display:flex; justify-content:space-between; font-size:14px; padding:3px 0; color:#333; }
+.vd-ticket-sep { border-top:1px dashed #cfcfcf; margin:8px 0; }
+.vd-ticket-total { font-weight:800; font-size:17px; color:#0e4531; }
+.vd-print-btn {
+  border:1px solid #0e4531; background:#fff; color:#0e4531; font-weight:700;
+  font-size:15px; padding:12px 18px; border-radius:12px; cursor:pointer;
+}
+.vd-print-btn:hover { background:#0e4531; color:#fff; }

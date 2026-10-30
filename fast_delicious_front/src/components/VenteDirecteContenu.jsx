@@ -31,6 +31,7 @@ export default function VenteDirecteContenu() {
   const [modePaiement, setModePaiement] = useState("ESPECES");
   const [referencePaiement, setReferencePaiement] = useState("");
   const [numeroTable, setNumeroTable] = useState("");
+  const [montantRecu, setMontantRecu] = useState(""); // espèces : somme donnée par le client
 
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [erreur, setErreur] = useState(null);
@@ -145,6 +146,7 @@ export default function VenteDirecteContenu() {
     setReferencePaiement("");
     setNumeroTable("");
     setModePaiement("ESPECES");
+    setMontantRecu("");
   }
 
   const total = useMemo(
@@ -159,6 +161,10 @@ export default function VenteDirecteContenu() {
     () => panier.reduce((n, l) => n + l.quantite, 0),
     [panier]
   );
+
+  // Rendu de monnaie (espèces uniquement)
+  const montantRecuNum = parseInt(montantRecu, 10) || 0;
+  const rendu = montantRecuNum - total;
 
   async function encaisser() {
     if (panier.length === 0) return;
@@ -186,7 +192,27 @@ export default function VenteDirecteContenu() {
 
     try {
       const { data } = await client.post("caisse/vente-directe/", payload);
-      setConfirmation(data);
+      // Ticket construit à partir du panier local (pour impression immédiate).
+      const recu = {
+        id: data?.id,
+        date: new Date(),
+        numero: numeroTable.trim(),
+        mode: modePaiement,
+        reference: referencePaiement.trim(),
+        lignes: panier.map((l) => ({
+          nom: l.plat.nom,
+          quantite: l.quantite,
+          sousTotal: Number(l.plat.prix) * l.quantite,
+          options: [
+            ...(l.accompagnement ? [l.accompagnement.nom] : []),
+            ...(l.selections || []).map((s) => s.option_nom).filter(Boolean),
+          ],
+        })),
+        total,
+        montantRecu: modePaiement === "ESPECES" && montantRecu !== "" ? montantRecuNum : null,
+        rendu: modePaiement === "ESPECES" && montantRecu !== "" ? montantRecuNum - total : null,
+      };
+      setConfirmation(recu);
       viderPanier();
     } catch (e) {
       console.error("Erreur vente directe :", e);
@@ -378,6 +404,31 @@ export default function VenteDirecteContenu() {
             ))}
           </div>
 
+          {modePaiement === "ESPECES" && (
+            <div className="vd-rendu">
+              <input
+                className="vd-input"
+                type="number"
+                inputMode="numeric"
+                min="0"
+                value={montantRecu}
+                onChange={(e) => setMontantRecu(e.target.value)}
+                placeholder="Montant reçu du client (facultatif)"
+              />
+              {montantRecu !== "" && (
+                rendu >= 0 ? (
+                  <div className="vd-rendu-ok">
+                    Rendu à faire : <strong>{rendu} F</strong>
+                  </div>
+                ) : (
+                  <div className="vd-rendu-manque">
+                    Il manque : <strong>{-rendu} F</strong>
+                  </div>
+                )
+              )}
+            </div>
+          )}
+
           {modePaiement !== "ESPECES" && (
             <input
               className="vd-input"
@@ -437,10 +488,41 @@ export default function VenteDirecteContenu() {
             <p>
               Commande <strong>#{confirmation.id}</strong> encaissée et servie.
             </p>
-            {confirmation.total != null && (
-              <div className="vd-confirm-total">{confirmation.total} F</div>
-            )}
+
+            {/* Aperçu du ticket */}
+            <div className="vd-ticket-apercu">
+              {confirmation.lignes?.map((l, i) => (
+                <div className="vd-ticket-l" key={i}>
+                  <span>{l.quantite} × {l.nom}</span>
+                  <span>{l.sousTotal} F</span>
+                </div>
+              ))}
+              <div className="vd-ticket-sep" />
+              <div className="vd-ticket-l vd-ticket-total">
+                <span>TOTAL</span>
+                <span>{confirmation.total} F</span>
+              </div>
+              {confirmation.montantRecu != null && (
+                <>
+                  <div className="vd-ticket-l">
+                    <span>Reçu</span>
+                    <span>{confirmation.montantRecu} F</span>
+                  </div>
+                  <div className="vd-ticket-l">
+                    <span>Rendu</span>
+                    <span>{confirmation.rendu >= 0 ? confirmation.rendu : 0} F</span>
+                  </div>
+                </>
+              )}
+            </div>
+
             <div className="admin-modal-actions">
+              <button
+                className="vd-print-btn"
+                onClick={() => imprimerTicket(confirmation)}
+              >
+                🖨️ Imprimer le ticket
+              </button>
               <button
                 className="admin-modal-valider"
                 onClick={() => setConfirmation(null)}
@@ -453,6 +535,86 @@ export default function VenteDirecteContenu() {
       )}
     </div>
   );
+}
+
+/* ====================================================================== */
+/* Impression du ticket de caisse (fenêtre d'impression du navigateur).   */
+/* Format pensé pour une imprimante à reçu (ticket étroit ~80mm).         */
+/* ====================================================================== */
+const LIBELLE_MODE = {
+  ESPECES: "Espèces",
+  WAVE: "Wave",
+  ORANGE_MONEY: "Orange Money",
+  PI_MIX: "QR (PI Mix / YAS)",
+};
+
+function imprimerTicket(recu) {
+  const d = recu.date instanceof Date ? recu.date : new Date();
+  const dateStr = d.toLocaleString("fr-FR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+  const lignesHtml = (recu.lignes || [])
+    .map((l) => {
+      const opts = l.options && l.options.length
+        ? `<div class="opt">${l.options.join(" · ")}</div>`
+        : "";
+      return `<div class="row"><span>${l.quantite} × ${l.nom}</span><span>${l.sousTotal} F</span></div>${opts}`;
+    })
+    .join("");
+
+  const rendusHtml =
+    recu.montantRecu != null
+      ? `<div class="row"><span>Reçu</span><span>${recu.montantRecu} F</span></div>
+         <div class="row"><span>Rendu</span><span>${recu.rendu >= 0 ? recu.rendu : 0} F</span></div>`
+      : "";
+
+  const refHtml =
+    recu.mode !== "ESPECES" && recu.reference
+      ? `<div class="row small"><span>Réf.</span><span>${recu.reference}</span></div>`
+      : "";
+
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Ticket #${recu.id || ""}</title>
+  <style>
+    @page { size: 80mm auto; margin: 4mm; }
+    * { font-family: 'Courier New', monospace; }
+    body { width: 72mm; margin: 0 auto; color:#000; }
+    .center { text-align:center; }
+    h1 { font-size: 15px; margin: 2px 0; }
+    .muted { font-size: 11px; color:#333; }
+    .sep { border-top: 1px dashed #000; margin: 6px 0; }
+    .row { display:flex; justify-content:space-between; font-size: 13px; margin: 2px 0; }
+    .row.small { font-size: 11px; }
+    .opt { font-size: 11px; color:#333; margin-left: 8px; }
+    .total { font-weight: bold; font-size: 16px; }
+    .foot { text-align:center; font-size: 11px; margin-top: 8px; }
+  </style></head><body>
+    <div class="center">
+      <h1>MENU CONCESSION 5</h1>
+      <div class="muted">JOJ Dakar 2026</div>
+      <div class="muted">Reçu #${recu.id || "—"}</div>
+      <div class="muted">${dateStr}${recu.numero ? " · " + recu.numero : ""}</div>
+    </div>
+    <div class="sep"></div>
+    ${lignesHtml}
+    <div class="sep"></div>
+    <div class="row total"><span>TOTAL</span><span>${recu.total} F</span></div>
+    <div class="row small"><span>Paiement</span><span>${LIBELLE_MODE[recu.mode] || recu.mode}</span></div>
+    ${rendusHtml}
+    ${refHtml}
+    <div class="sep"></div>
+    <div class="foot">Merci et à bientôt !<br>menu-concession5.com</div>
+    <script>window.onload=function(){window.print();setTimeout(function(){window.close();},300);};<\/script>
+  </body></html>`;
+
+  const w = window.open("", "ticket", "width=380,height=640");
+  if (!w) {
+    alert("Autorisez les fenêtres pop-up pour imprimer le ticket.");
+    return;
+  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 /* ====================================================================== */

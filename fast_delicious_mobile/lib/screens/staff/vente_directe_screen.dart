@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../config/theme.dart';
 import '../../config/photo_locale.dart';
@@ -7,6 +9,7 @@ import '../../models/plat.dart';
 import '../../models/groupe_choix.dart';
 import '../../providers/cart_provider.dart' show SelectionPanier;
 import '../../services/api_client.dart';
+import '../../services/ventes_hors_ligne.dart';
 
 /// Vente directe (caisse au comptoir) — version mobile.
 ///
@@ -55,10 +58,48 @@ class _VenteDirecteScreenState extends State<VenteDirecteScreen> {
 
   final Map<String, _LigneVente> _panier = {};
 
+  int _enAttente = 0; // ventes hors ligne en attente de synchronisation
+  bool _syncEnCours = false;
+
   @override
   void initState() {
     super.initState();
     _charger();
+    _rafraichirEnAttente();
+    _synchroniser(silencieux: true); // tente de vider la file au démarrage
+  }
+
+  Future<void> _rafraichirEnAttente() async {
+    final n = await VentesHorsLigne.nombreEnAttente();
+    if (mounted) setState(() => _enAttente = n);
+  }
+
+  Future<void> _synchroniser({bool silencieux = false}) async {
+    if (_syncEnCours) return;
+    setState(() => _syncEnCours = true);
+    int envoyees = 0;
+    try {
+      envoyees = await VentesHorsLigne.synchroniser(_api);
+    } catch (_) {}
+    await _rafraichirEnAttente();
+    if (mounted) {
+      setState(() => _syncEnCours = false);
+      if (!silencieux) {
+        final reste = _enAttente;
+        final msg = envoyees > 0
+            ? '$envoyees vente(s) synchronisée(s).${reste > 0 ? " $reste encore en attente." : ""}'
+            : (reste > 0
+                ? 'Toujours hors ligne : $reste vente(s) en attente.'
+                : 'Rien à synchroniser.');
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(
+            content: Text(msg),
+            backgroundColor: envoyees > 0 ? AppColors.greenDim : AppColors.inkSoft,
+            behavior: SnackBarBehavior.floating,
+          ));
+      }
+    }
   }
 
   Future<void> _charger() async {
@@ -220,12 +261,51 @@ class _VenteDirecteScreenState extends State<VenteDirecteScreen> {
       appBar: AppBar(
         title: const Text('🛒 Vente directe'),
       ),
-      body: _chargement
-          ? const Center(child: CircularProgressIndicator())
-          : _erreurChargement != null
-              ? _etatErreur()
-              : _contenu(),
+      body: Column(
+        children: [
+          if (_enAttente > 0) _bandeauHorsLigne(),
+          Expanded(
+            child: _chargement
+                ? const Center(child: CircularProgressIndicator())
+                : _erreurChargement != null
+                    ? _etatErreur()
+                    : _contenu(),
+          ),
+        ],
+      ),
       bottomNavigationBar: _barreBas(),
+    );
+  }
+
+  Widget _bandeauHorsLigne() {
+    return Material(
+      color: const Color(0xFFFFF3E0),
+      child: InkWell(
+        onTap: _syncEnCours ? null : () => _synchroniser(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              const Icon(Icons.cloud_off, size: 20, color: Color(0xFFB26A00)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '$_enAttente vente(s) enregistrée(s) hors ligne, en attente de synchronisation.',
+                  style: const TextStyle(
+                      color: Color(0xFF8A5200), fontSize: 13.5, fontWeight: FontWeight.w600),
+                ),
+              ),
+              if (_syncEnCours)
+                const SizedBox(
+                    width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              else
+                const Text('Synchroniser',
+                    style: TextStyle(
+                        color: Color(0xFFB26A00), fontWeight: FontWeight.bold, fontSize: 13.5)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -484,13 +564,18 @@ class _VenteDirecteScreenState extends State<VenteDirecteScreen> {
     );
   }
 
-  /// Envoi de la vente au backend. Renvoie null si succès, sinon un message d'erreur.
-  Future<String?> envoyerVente({
+  /// Envoi de la vente au backend.
+  ///
+  /// Renvoie un résultat : {status: 'ok'|'offline'|'error', id?, message?}.
+  /// - 'ok'      : enregistrée sur le serveur.
+  /// - 'offline' : réseau coupé → mise en file locale, sera synchronisée.
+  /// - 'error'   : refus du serveur (ex. données invalides) → message affiché.
+  Future<Map<String, dynamic>> envoyerVente({
     required String modePaiement,
     required String numeroTable,
     required String referencePaiement,
   }) async {
-    if (_panier.isEmpty) return 'Le panier est vide.';
+    if (_panier.isEmpty) return {'status': 'error', 'message': 'Le panier est vide.'};
     final lignes = _panier.values.map((l) {
       return {
         'plat_id': l.plat.id,
@@ -514,11 +599,18 @@ class _VenteDirecteScreenState extends State<VenteDirecteScreen> {
       final reponse = await _api.post('caisse/vente-directe/', data: data);
       final id = reponse.data is Map ? reponse.data['id'] : null;
       setState(() => _panier.clear());
-      return id != null ? 'OK#$id' : 'OK';
+      return {'status': 'ok', 'id': id};
     } on DioException catch (e) {
-      return _messageErreur(e);
+      if (e.response == null) {
+        // Pas de réponse = hors ligne : on sauvegarde la vente localement.
+        await VentesHorsLigne.ajouter(data);
+        await _rafraichirEnAttente();
+        setState(() => _panier.clear());
+        return {'status': 'offline'};
+      }
+      return {'status': 'error', 'message': _messageErreur(e)};
     } catch (_) {
-      return "La vente n'a pas pu être enregistrée. Réessaie.";
+      return {'status': 'error', 'message': "La vente n'a pas pu être enregistrée. Réessaie."};
     }
   }
 
@@ -777,6 +869,7 @@ class _PanierSheetState extends State<_PanierSheet> {
   String _modePaiement = 'ESPECES';
   final _refCtrl = TextEditingController();
   final _tableCtrl = TextEditingController();
+  final _recuCtrl = TextEditingController(); // espèces : montant donné par le client
   bool _envoi = false;
   String? _erreur;
 
@@ -786,10 +879,14 @@ class _PanierSheetState extends State<_PanierSheet> {
   void dispose() {
     _refCtrl.dispose();
     _tableCtrl.dispose();
+    _recuCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _encaisser(StateSetter setSheet) async {
+    // On capture le ticket AVANT l'envoi (le panier sera vidé ensuite).
+    final recu = _construireRecu();
+
     setSheet(() {
       _erreur = null;
       _envoi = true;
@@ -800,19 +897,49 @@ class _PanierSheetState extends State<_PanierSheet> {
       referencePaiement: _refCtrl.text,
     );
     if (!mounted) return;
-    if (res != null && res.startsWith('OK')) {
-      final id = res.contains('#') ? res.split('#')[1] : null;
+    final status = res['status'];
+    if (status == 'ok' || status == 'offline') {
       Navigator.pop(context); // ferme la feuille panier
-      _afficherSucces(id);
+      _afficherSucces(res['id']?.toString(), recu, horsLigne: status == 'offline');
+      // Connexion rétablie : on en profite pour vider la file hors ligne.
+      if (status == 'ok' && etat._enAttente > 0) etat._synchroniser(silencieux: true);
     } else {
       setSheet(() {
-        _erreur = res;
+        _erreur = res['message']?.toString() ?? "La vente n'a pas pu être enregistrée.";
         _envoi = false;
       });
     }
   }
 
-  void _afficherSucces(String? id) {
+  /// Construit le ticket à partir du panier et des infos de paiement.
+  Map<String, dynamic> _construireRecu() {
+    final total = etat._totalPrix;
+    final recu = int.tryParse(_recuCtrl.text);
+    return {
+      'date': DateTime.now(),
+      'numero': _tableCtrl.text.trim(),
+      'mode': _modePaiement,
+      'reference': _refCtrl.text.trim(),
+      'lignes': etat._panier.values
+          .map((l) => {
+                'nom': l.plat.nom,
+                'quantite': l.quantite,
+                'sousTotal': l.sousTotal,
+                'options': [
+                  if (l.accompagnementNom != null) l.accompagnementNom!,
+                  ...l.selections.map((s) => s.optionNom),
+                ],
+              })
+          .toList(),
+      'total': total,
+      'montantRecu': _modePaiement == 'ESPECES' && recu != null ? recu : null,
+      'rendu': _modePaiement == 'ESPECES' && recu != null ? recu - total : null,
+    };
+  }
+
+  void _afficherSucces(String? id, Map<String, dynamic> recu, {bool horsLigne = false}) {
+    final total = (recu['total'] as num?)?.toStringAsFixed(0) ?? '';
+    final rendu = recu['rendu'] as num?;
     showDialog(
       context: etat.context,
       builder: (ctx) => AlertDialog(
@@ -820,34 +947,96 @@ class _PanierSheetState extends State<_PanierSheet> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_circle, color: AppColors.green, size: 54),
+            Icon(horsLigne ? Icons.cloud_done : Icons.check_circle,
+                color: horsLigne ? const Color(0xFFB26A00) : AppColors.green, size: 54),
             const SizedBox(height: 10),
-            const Text('Vente enregistrée',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(horsLigne ? 'Vente enregistrée hors ligne' : 'Vente enregistrée',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Text(
-              id != null
-                  ? 'Commande #$id encaissée et servie.'
-                  : 'Commande encaissée et servie.',
+              horsLigne
+                  ? 'Pas de réseau : la vente sera synchronisée automatiquement dès le retour de la connexion.'
+                  : (id != null
+                      ? 'Commande #$id encaissée et servie.'
+                      : 'Commande encaissée et servie.'),
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.inkSoft),
+              style: const TextStyle(color: AppColors.inkSoft, fontSize: 14),
             ),
+            const SizedBox(height: 12),
+            Text('$total F',
+                style: const TextStyle(
+                    fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.greenDim)),
+            if (rendu != null && rendu >= 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text('Rendu : ${rendu.toStringAsFixed(0)} F',
+                    style: const TextStyle(fontSize: 15, color: AppColors.ink)),
+              ),
           ],
         ),
         actions: [
-          Center(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.greenDim,
-                foregroundColor: Colors.white,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton.icon(
+                onPressed: () => _partagerRecu(id, recu),
+                icon: const Icon(Icons.print_outlined, size: 20),
+                label: const Text('Imprimer / Partager'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.greenDim),
               ),
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Nouvelle vente'),
-            ),
+              const SizedBox(width: 6),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.greenDim,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Nouvelle vente'),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  /// Partage le reçu en texte (le menu Android/iOS permet d'imprimer,
+  /// d'envoyer à une imprimante Bluetooth ou par WhatsApp/SMS).
+  void _partagerRecu(String? id, Map<String, dynamic> recu) {
+    final libelle = {
+      'ESPECES': 'Espèces',
+      'WAVE': 'Wave',
+      'ORANGE_MONEY': 'Orange Money',
+      'PI_MIX': 'QR (PI Mix / YAS)',
+    };
+    final d = recu['date'] as DateTime? ?? DateTime.now();
+    final b = StringBuffer();
+    b.writeln('MENU CONCESSION 5');
+    b.writeln('JOJ Dakar 2026');
+    b.writeln('Reçu${id != null ? " #$id" : ""}');
+    b.writeln(DateFormat('dd/MM/yyyy HH:mm').format(d) +
+        ((recu['numero'] as String?)?.isNotEmpty == true ? ' · ${recu['numero']}' : ''));
+    b.writeln('------------------------------');
+    for (final l in (recu['lignes'] as List)) {
+      b.writeln('${l['quantite']} x ${l['nom']} — ${(l['sousTotal'] as num).toStringAsFixed(0)} F');
+      final opts = (l['options'] as List).where((o) => o != null && '$o'.isNotEmpty).toList();
+      if (opts.isNotEmpty) b.writeln('   ${opts.join(" · ")}');
+    }
+    b.writeln('------------------------------');
+    b.writeln('TOTAL : ${(recu['total'] as num).toStringAsFixed(0)} F');
+    b.writeln('Paiement : ${libelle[recu['mode']] ?? recu['mode']}');
+    if (recu['montantRecu'] != null) {
+      b.writeln('Reçu : ${(recu['montantRecu'] as num).toStringAsFixed(0)} F');
+      final r = recu['rendu'] as num;
+      b.writeln('Rendu : ${(r >= 0 ? r : 0).toStringAsFixed(0)} F');
+    }
+    if (recu['mode'] != 'ESPECES' && (recu['reference'] as String?)?.isNotEmpty == true) {
+      b.writeln('Réf. : ${recu['reference']}');
+    }
+    b.writeln('Merci et à bientôt !');
+    b.writeln('menu-concession5.com');
+    Share.share(b.toString(), subject: 'Reçu${id != null ? " #$id" : ""}');
   }
 
   @override
@@ -1029,6 +1218,45 @@ class _PanierSheetState extends State<_PanierSheet> {
             }).toList(),
           ),
           const SizedBox(height: 10),
+          if (_modePaiement == 'ESPECES') ...[
+            TextField(
+              controller: _recuCtrl,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => setSheet(() {}),
+              decoration: const InputDecoration(
+                hintText: 'Montant reçu du client (facultatif)',
+                isDense: true,
+              ),
+            ),
+            Builder(builder: (_) {
+              final recu = int.tryParse(_recuCtrl.text);
+              if (recu == null) return const SizedBox(height: 10);
+              final rendu = recu - total;
+              final ok = rendu >= 0;
+              return Container(
+                margin: const EdgeInsets.only(top: 8, bottom: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: ok ? const Color(0xFFE9F7EF) : const Color(0xFFFDECEC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: ok ? const Color(0xFFBFE6CF) : const Color(0xFFF3C2C2)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(ok ? 'Rendu à faire : ' : 'Il manque : ',
+                        style: TextStyle(
+                            color: ok ? AppColors.greenDim : AppColors.red, fontSize: 14)),
+                    Text('${(ok ? rendu : -rendu).toStringAsFixed(0)} F',
+                        style: TextStyle(
+                            color: ok ? AppColors.greenDim : AppColors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800)),
+                  ],
+                ),
+              );
+            }),
+          ],
           if (_modePaiement != 'ESPECES')
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
