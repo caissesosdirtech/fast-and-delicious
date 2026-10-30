@@ -1,0 +1,69 @@
+.pay-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(10, 16, 24, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.pay-modal {
+  position: relative;
+  background: #fff; color: #1d2939;
+  border-radius: 18px;
+  width: 100%; max-width: 420px;
+  padding: 26px 26px 30px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+.pay-close {
+  position: absolute; top: 14px; right: 16px;
+  border: none; background: transparent; font-size: 20px; cursor: pointer; color: #98a2b3;
+}
+.pay-modal h3 { margin: 0 0 4px; font-size: 21px; }
+.pay-sous { margin: 0 0 18px; color: #475467; font-size: 15px; }
+.pay-hint { color: #667085; font-size: 14.5px; margin: 0 0 14px; line-height: 1.4; }
+
+.pay-choix { display: flex; flex-direction: column; gap: 12px; }
+.pay-provider {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 2px solid #e5e7eb; background: #fff;
+  border-radius: 14px; padding: 16px 20px;
+  font-size: 17px; font-weight: 700; cursor: pointer; color: #1d2939;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.pay-provider:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,0.1); }
+.pay-provider-fl { font-size: 20px; color: #98a2b3; }
+
+.pay-centre { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.pay-qr {
+  background: #fff; padding: 12px; border-radius: 14px;
+  border: 1px solid #eef0f2; box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+.pay-lien {
+  color: #0e4531; font-weight: 700; font-size: 15px; text-decoration: underline;
+}
+.pay-attente {
+  display: flex; align-items: center; gap: 10px;
+  color: #b26a00; font-weight: 600; font-size: 14.5px;
+  background: #fff4e5; border-radius: 999px; padding: 9px 18px; margin-top: 4px;
+}
+.pay-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;
+  animation: payPulse 1s infinite;
+}
+@keyframes payPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+.pay-spinner {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 4px solid #e5e7eb; border-top-color: #0e4531;
+  animation: paySpin 0.8s linear infinite;
+}
+@keyframes paySpin { to { transform: rotate(360deg); } }
+
+.pay-ok { font-size: 54px; }
+.pay-err { font-size: 44px; }
+.pay-modal h4 { margin: 2px 0; font-size: 19px; }
+.pay-erreur-txt { color: #c62828; font-size: 15px; }
+.pay-btn {
+  margin-top: 10px; border: none; cursor: pointer;
+  background: #0e4531; color: #fff; font-weight: 700; font-size: 15px;
+  padding: 12px 26px; border-radius: 12px;
+}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import client from "../api/client";
 import EmptyState from "./EmptyState";
 import TicketModal from "./TicketModal";
+import PaiementEnLigneModal from "./PaiementEnLigneModal";
 
 const LABELS_STATUT = {
   EN_ATTENTE: "En attente", VALIDEE: "Validée", EN_PREPARATION: "En préparation",
@@ -25,6 +26,7 @@ export default function CommandesContenu() {
   const [charge, setCharge] = useState(false);
   const [enTraitement, setEnTraitement] = useState({});
   const [ticketOuvert, setTicketOuvert] = useState(null);
+  const [paiementOuvert, setPaiementOuvert] = useState(null); // commande dont on demande le paiement
 
   const [historique, setHistorique] = useState([]);
   const [limiteHisto, setLimiteHisto] = useState(PAS_HISTORIQUE);
@@ -129,6 +131,12 @@ export default function CommandesContenu() {
                   {cmd.statut === "PRETE" && (
                     <button className="cmd-btn cmd-btn-vert" disabled={enTraitement[cmd.id]} onClick={() => terminer(cmd.id)}>✔ Terminer</button>
                   )}
+                  {!cmd.paiement_confirme && cmd.statut !== "SERVIE" && cmd.statut !== "ANNULEE" && (
+                    <button className="cmd-btn cmd-btn-paiement" onClick={() => setPaiementOuvert(cmd)}>💳 Paiement en ligne</button>
+                  )}
+                  {cmd.paiement_confirme && (
+                    <span className="cmd-badge-paye">✅ Payé</span>
+                  )}
                   {(cmd.paiement_confirme || cmd.statut === "SERVIE") && (
                     <button className="cmd-btn cmd-btn-recu" onClick={() => setTicketOuvert(cmd)}>🧾 Reçu</button>
                   )}
@@ -174,6 +182,14 @@ export default function CommandesContenu() {
       </div>
 
       {ticketOuvert && <TicketModal commande={ticketOuvert} onFermer={() => setTicketOuvert(null)} />}
+
+      {paiementOuvert && (
+        <PaiementEnLigneModal
+          commande={paiementOuvert}
+          onFermer={() => setPaiementOuvert(null)}
+          onPaye={rafraichir}
+        />
+      )}
     </>
   );
 }

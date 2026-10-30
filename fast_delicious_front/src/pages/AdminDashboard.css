@@ -139,6 +139,9 @@
 .cmd-btn-vert{ background:var(--green); }
 .cmd-btn-rouge{ background:var(--red); }
 .cmd-btn-recu{ background:#8A5A1E; }
+.cmd-btn-paiement{ background:#0A6B41; }
+.cmd-badge-paye{ display:inline-flex; align-items:center; gap:4px; background:rgba(46,199,122,.18);
+  color:#1b7a46; font-weight:800; font-size:12.5px; padding:6px 12px; border-radius:999px; }
 
 /* Graphique 7 derniers jours (Statistiques) */
 .chart7{ display:flex; align-items:flex-end; gap:10px; min-height:170px; padding-top:8px; }
