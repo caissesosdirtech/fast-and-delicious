@@ -175,3 +175,29 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 if _frontend_url:
     CSRF_TRUSTED_ORIGINS.append(_frontend_url)
+
+# ============================================================
+# Paiement en ligne — Wave & Orange Money (confirmation auto)
+# ============================================================
+# Toutes ces valeurs se règlent par variables d'environnement (Railway →
+# Variables). Tant qu'elles sont vides, les endpoints de paiement répondent
+# « non configuré » : le reste de l'application n'est pas affecté.
+
+# URL publique du frontend (déjà utilisée plus haut) pour les pages de retour.
+PAIEMENT_RETOUR_URL = _frontend_url or "https://www.menu-concession5.com"
+
+# --- Wave Business (https://api.wave.com) ---
+WAVE_API_KEY = os.environ.get("WAVE_API_KEY", "")
+WAVE_API_BASE = os.environ.get("WAVE_API_BASE", "https://api.wave.com")
+# Secret du webhook Wave, pour vérifier la signature des notifications.
+WAVE_WEBHOOK_SECRET = os.environ.get("WAVE_WEBHOOK_SECRET", "")
+
+# --- Orange Money (Orange Developer / Sonatel) ---
+ORANGE_CLIENT_ID = os.environ.get("ORANGE_CLIENT_ID", "")
+ORANGE_CLIENT_SECRET = os.environ.get("ORANGE_CLIENT_SECRET", "")
+ORANGE_MERCHANT_KEY = os.environ.get("ORANGE_MERCHANT_KEY", "")
+ORANGE_API_BASE = os.environ.get("ORANGE_API_BASE", "https://api.orange.com")
+# Pays de l'API Web Payment Orange (ex: "cisenegal" / "sn" selon ton contrat).
+ORANGE_PAYS = os.environ.get("ORANGE_PAYS", "cisenegal")
+# Devise : "OUV" en test, "XOF" en production (selon Orange).
+ORANGE_DEVISE = os.environ.get("ORANGE_DEVISE", "XOF")

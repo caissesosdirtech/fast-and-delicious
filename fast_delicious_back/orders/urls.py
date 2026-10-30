@@ -12,6 +12,9 @@ urlpatterns = [
     # Caisse
     path("caisse/commandes/", views.FileAttenteCaisseView.as_view(), name="caisse-file"),
     path("caisse/vente-directe/", views.VenteDirecteView.as_view(), name="caisse-vente-directe"),
+    path("caisse/commandes/<int:pk>/paiement/", views.InitierPaiementView.as_view(), name="caisse-paiement-initier"),
+    path("webhooks/wave/", views.WaveWebhookView.as_view(), name="webhook-wave"),
+    path("webhooks/orange-money/", views.OrangeMoneyWebhookView.as_view(), name="webhook-orange"),
     path("caisse/commandes/<int:pk>/encaisser/", views.EncaisserCommandeView.as_view(), name="caisse-encaisser"),
     path("caisse/commandes/<int:pk>/valider/", views.ValiderCommandeView.as_view(), name="caisse-valider"),
     path("caisse/commandes/<int:pk>/prete/", views.MarquerPreteView.as_view(), name="caisse-prete"),
@@ -33,6 +36,7 @@ urlpatterns = [
 
     # Admin
     path("admin/statistiques/", views.StatistiquesAdminView.as_view(), name="admin-statistiques"),
+    path("admin/statistiques/avancees/", views.StatistiquesAvanceesView.as_view(), name="admin-statistiques-avancees"),
     path("admin/caisse/", views.EtatCaisseView.as_view(), name="admin-caisse",),
     path("admin/caisse/export/", views.ExportCaisseView.as_view(), name="admin-caisse-export",),
 ]

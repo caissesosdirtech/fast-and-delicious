@@ -1,0 +1,123 @@
+/* ============================================================
+ * Statistiques détaillées (onglet Statistiques)
+ * Graphiques en CSS pur — aucune dépendance.
+ * ============================================================ */
+.stats-av {
+  background: var(--panel, #fff);
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin-top: 20px;
+}
+.stats-av-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.stats-av-tete h3 { margin: 0; font-size: 20px; }
+.stats-av-periodes { display: flex; gap: 6px; flex-wrap: wrap; }
+.stats-av-periodes button {
+  border: 1px solid var(--line, #d7d7dc);
+  background: transparent;
+  color: var(--ink-soft, #555);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.stats-av-periodes button.actif {
+  background: #0e4531;
+  border-color: #0e4531;
+  color: #fff;
+}
+.stats-av-erreur { color: #c62828; }
+
+.stats-av-totaux { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.stats-av-kpi {
+  flex: 1 1 180px;
+  background: linear-gradient(135deg, #f3faf6, #eaf5ee);
+  border: 1px solid #d6eade;
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stats-av-kpi span { font-size: 13px; color: var(--ink-soft, #667085); font-weight: 600; }
+.stats-av-kpi strong { font-size: 26px; color: #0e4531; }
+
+.stats-av-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+.stats-av-carte {
+  border: 1px solid var(--line, #eee);
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: #fcfcfc;
+}
+.stats-av-carte h4 { margin: 0 0 14px; font-size: 15px; }
+.stats-av-vide { color: var(--ink-soft, #98a2b3); font-size: 14px; }
+
+/* Barres horizontales (produits, caissières, lieux) */
+.stats-av-barres { display: flex; flex-direction: column; gap: 12px; }
+.stats-av-ligne-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.stats-av-nom { font-weight: 600; font-size: 14px; color: #1d2939; }
+.stats-av-val { font-size: 12.5px; color: var(--ink-soft, #667085); white-space: nowrap; }
+.stats-av-track {
+  background: #eef0f2;
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+.stats-av-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #12a05c, #0e4531);
+  min-width: 4px;
+  transition: width 0.4s ease;
+}
+.stats-av-fill.gold { background: linear-gradient(90deg, #f0b94a, #d6902a); }
+.stats-av-fill.teal { background: linear-gradient(90deg, #2bb6b0, #11786f); }
+
+/* Histogramme des heures */
+.stats-av-heures {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  min-height: 140px;
+}
+.stats-av-heure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 34px;
+}
+.stats-av-heure-val { font-size: 12px; font-weight: 700; color: #0e4531; }
+.stats-av-heure-barwrap {
+  height: 100px;
+  width: 22px;
+  display: flex;
+  align-items: flex-end;
+}
+.stats-av-heure-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #12a05c, #0e4531);
+  border-radius: 6px 6px 0 0;
+  min-height: 4px;
+}
+.stats-av-heure-lab { font-size: 11px; color: var(--ink-soft, #667085); }

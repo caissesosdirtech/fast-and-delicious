@@ -883,3 +883,227 @@ class VenteDirecteView(APIView):
         serializer.is_valid(raise_exception=True)
         commande = serializer.save()
         return Response(CommandeSerializer(commande).data, status=status.HTTP_201_CREATED)
+
+
+class StatistiquesAvanceesView(APIView):
+    """GET /api/admin/statistiques/avancees/?periode=jour|semaine|mois|annee[&lieu=<id>]
+
+    Statistiques enrichies pour l'admin :
+      - produits les plus vendus (quantité + chiffre d'affaires) ;
+      - heures de pointe (nombre de commandes et CA par heure de la journée) ;
+      - chiffre d'affaires par caissière ;
+      - chiffre d'affaires par stand / lieu.
+
+    Comme pour la vue d'ensemble, un membre du staff affecté à un lieu ne voit
+    que son lieu ; un admin voit tout (ou un lieu précis via ?lieu=<id>).
+    """
+
+    permission_classes = [EstPersonnelInterne]
+
+    def get(self, request):
+        lieu_id = request.query_params.get("lieu")
+        if getattr(request.user, "lieu_id", None) and request.user.role != "admin":
+            lieu_id = request.user.lieu_id
+
+        periode = request.query_params.get("periode", "jour")
+        aujourdhui = timezone.localdate()
+        if periode == "semaine":
+            debut = aujourdhui - timedelta(days=6)
+        elif periode == "mois":
+            debut = aujourdhui.replace(day=1)
+        elif periode == "annee":
+            debut = aujourdhui.replace(month=1, day=1)
+        else:
+            periode = "jour"
+            debut = aujourdhui
+        fin = aujourdhui
+
+        commandes = Commande.objects.filter(
+            date_creation__date__gte=debut, date_creation__date__lte=fin,
+        ).exclude(statut=Commande.Statut.ANNULEE)
+        if lieu_id:
+            commandes = commandes.filter(lieu_id=lieu_id)
+
+        montant = lambda champ_qte, champ_prix: models.Sum(
+            models.ExpressionWrapper(
+                models.F(champ_qte) * models.F(champ_prix),
+                output_field=models.DecimalField(max_digits=12, decimal_places=2),
+            )
+        )
+
+        # --- Produits les plus vendus (quantité + CA), agrégés en base ---
+        lignes = (
+            LigneCommande.objects.filter(commande__in=commandes)
+            .values("plat__nom")
+            .annotate(qte_totale=models.Sum("quantite"), ca=montant("quantite", "plat__prix"))
+            .order_by("-qte_totale")[:10]
+        )
+        top_produits = [
+            {"nom": l["plat__nom"], "quantite": l["qte_totale"], "ca": float(l["ca"] or 0)}
+            for l in lignes
+        ]
+
+        # --- CA par commande (annotation), puis répartition par heure / caissière / lieu ---
+        commandes_ca = commandes.annotate(
+            ca=montant("lignes__quantite", "lignes__plat__prix")
+        ).select_related("caissiere", "lieu")
+
+        par_heure = {h: {"heure": h, "nombre": 0, "ca": 0.0} for h in range(24)}
+        par_caissiere = {}
+        par_lieu = {}
+        total_ca = 0.0
+        total_nb = 0
+
+        for c in commandes_ca:
+            ca = float(c.ca or 0)
+            total_ca += ca
+            total_nb += 1
+
+            h = timezone.localtime(c.date_creation).hour
+            par_heure[h]["nombre"] += 1
+            par_heure[h]["ca"] += ca
+
+            if c.caissiere:
+                nom_c = (c.caissiere.get_full_name() or "").strip() or c.caissiere.username
+            else:
+                nom_c = "Non attribuée"
+            agg_c = par_caissiere.setdefault(nom_c, {"nom": nom_c, "nombre": 0, "ca": 0.0})
+            agg_c["nombre"] += 1
+            agg_c["ca"] += ca
+
+            nom_l = c.lieu.nom if c.lieu else "Sans lieu"
+            agg_l = par_lieu.setdefault(nom_l, {"nom": nom_l, "nombre": 0, "ca": 0.0})
+            agg_l["nombre"] += 1
+            agg_l["ca"] += ca
+
+        return Response({
+            "periode": periode,
+            "debut": debut.isoformat(),
+            "fin": fin.isoformat(),
+            "lieu_id": int(lieu_id) if lieu_id else None,
+            "totaux": {"nombre": total_nb, "ca": round(total_ca, 2)},
+            "top_produits": top_produits,
+            "par_heure": [par_heure[h] for h in range(24)],
+            "par_caissiere": sorted(par_caissiere.values(), key=lambda x: -x["ca"]),
+            "par_lieu": sorted(par_lieu.values(), key=lambda x: -x["ca"]),
+        })
+
+
+# ============================================================
+# PAIEMENT EN LIGNE — Wave & Orange Money
+# ============================================================
+from .paiements import (  # noqa: E402  (import groupé en fin de fichier)
+    WaveClient, OrangeMoneyClient, PaiementNonConfigure, ErreurPaiement,
+)
+
+
+def _confirmer_paiement(commande, mode, reference=""):
+    """Marque une commande comme payée et prévient la caisse en temps réel."""
+    commande.paiement_confirme = True
+    commande.mode_paiement = mode
+    if reference:
+        commande.reference_paiement = reference
+    commande.save(update_fields=["paiement_confirme", "mode_paiement", "reference_paiement"])
+    try:
+        notifier_caisse(commande, evenement="paiement_confirme")
+    except Exception:
+        pass
+
+
+class InitierPaiementView(APIView):
+    """POST /api/caisse/commandes/<id>/paiement/  body: {"provider": "WAVE"|"ORANGE_MONEY"}
+
+    Crée une demande de paiement chez le fournisseur et renvoie l'URL / QR à
+    présenter au client. La confirmation arrivera via le webhook.
+    """
+
+    permission_classes = [EstCaissiere]
+
+    def post(self, request, pk):
+        commande = get_object_or_404(Commande, pk=pk)
+        provider = (request.data.get("provider") or "").upper()
+        montant = commande.total
+
+        try:
+            if provider == "WAVE":
+                resultat = WaveClient.creer_session(commande, montant)
+            elif provider == "ORANGE_MONEY":
+                resultat = OrangeMoneyClient.creer_paiement(commande, montant)
+            else:
+                return Response({"detail": "Fournisseur inconnu (WAVE ou ORANGE_MONEY)."}, status=400)
+        except PaiementNonConfigure as e:
+            return Response({"detail": str(e)}, status=400)
+        except ErreurPaiement as e:
+            return Response({"detail": str(e)}, status=502)
+
+        # On mémorise le fournisseur et l'identifiant de session (utile au webhook).
+        commande.mode_paiement = provider
+        commande.reference_paiement = resultat.get("session_id", "")
+        commande.save(update_fields=["mode_paiement", "reference_paiement"])
+
+        return Response(resultat, status=200)
+
+
+class WaveWebhookView(APIView):
+    """POST /api/webhooks/wave/  — notification de Wave (signature vérifiée)."""
+
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        signature = request.headers.get("Wave-Signature", "")
+        if not WaveClient.verifier_signature(request.body, signature):
+            return Response({"detail": "Signature invalide."}, status=400)
+
+        evenement = request.data or {}
+        if evenement.get("type") != "checkout.session.completed":
+            return Response({"recu": True})  # autre évènement : on accuse réception
+
+        data = evenement.get("data", {}) or {}
+        if (data.get("payment_status") or "").lower() not in ("succeeded", "success", "paid"):
+            return Response({"recu": True})
+
+        ref = data.get("client_reference")
+        if ref:
+            try:
+                commande = Commande.objects.get(pk=int(ref))
+                _confirmer_paiement(
+                    commande, "WAVE",
+                    reference=data.get("transaction_id") or data.get("id") or "",
+                )
+            except (Commande.DoesNotExist, ValueError, TypeError):
+                pass
+        return Response({"recu": True})
+
+
+class OrangeMoneyWebhookView(APIView):
+    """POST /api/webhooks/orange-money/ — notification d'Orange Money."""
+
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        data = request.data or {}
+        order_id = data.get("order_id")
+        statut = (data.get("status") or "").upper()
+        if not order_id:
+            return Response({"recu": True})
+
+        try:
+            commande = Commande.objects.get(pk=int(order_id))
+        except (Commande.DoesNotExist, ValueError, TypeError):
+            return Response({"recu": True})
+
+        # Par sécurité, on reconfirme le statut auprès d'Orange (le pay_token a été
+        # mémorisé dans reference_paiement au moment de l'initiation).
+        succes = statut in ("SUCCESS", "SUCCESSFUL", "COMPLETED")
+        pay_token = commande.reference_paiement
+        if pay_token:
+            try:
+                succes = OrangeMoneyClient.verifier_statut(order_id, commande.total, pay_token)
+            except ErreurPaiement:
+                pass  # on garde le statut de la notification en secours
+
+        if succes:
+            _confirmer_paiement(commande, "ORANGE_MONEY", reference=str(data.get("txnid") or ""))
+        return Response({"recu": True})

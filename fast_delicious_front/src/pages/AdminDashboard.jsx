@@ -5,6 +5,7 @@ import EmptyState from "../components/EmptyState";
 import TicketModal from "../components/TicketModal";
 import ProduitsContenu from "../components/ProduitsContenu";
 import VenteDirecteContenu from "../components/VenteDirecteContenu";
+import StatistiquesAvancees from "../components/StatistiquesAvancees";
 import CaisseContenu from "../components/CaisseContenu";
 import CategoriesContenu from "../components/CategoriesContenu";
 import TablesContenu from "../components/TablesContenu";
@@ -750,6 +751,12 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {/* =====================================================
+            STATISTIQUES DÉTAILLÉES (top produits, heures de pointe,
+            CA par caissière et par lieu)
+        ====================================================== */}
+        <StatistiquesAvancees />
 
         {ticketOuvert && (
           <TicketModal
