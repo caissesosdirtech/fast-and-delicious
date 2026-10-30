@@ -55,6 +55,7 @@ const List<_Regle> _regles = [
   _Regle('the-bissap.png', [['the', 'bissap']]),
   _Regle('jus-locaux.png', [['jus']]),
   _Regle('fanta-coca-sprite.png', [['fanta'], ['coca'], ['sprite'], ['soda']]),
+  _Regle('eau-minerale.png', [['eau'], ['minerale']]),
 ];
 
 /// Renvoie le chemin de l'asset (ex: 'assets/plats/wrap-poulet.png') ou null.

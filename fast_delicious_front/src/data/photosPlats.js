@@ -52,6 +52,7 @@ const REGLES = [
   { fichier: "the-bissap.png",           motifs: [["the", "bissap"]] },
   { fichier: "jus-locaux.png",           motifs: [["jus"]] }, // "Jus locaux en canette" (assortiment)
   { fichier: "fanta-coca-sprite.png",    motifs: [["fanta"], ["coca"], ["sprite"], ["soda"]] },
+  { fichier: "eau-minerale.png",         motifs: [["eau"], ["minerale"]] },
 ];
 
 export function photoLocalePlat(nom) {
