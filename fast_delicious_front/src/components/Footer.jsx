@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="app-footer-inner">
 
         <div className="app-footer-copyright">
-          <span>© {annee} · JOJ Dakar 2026</span>
+          <span>© {annee} · Fast &amp; Delicious</span>
         </div>
 
       </div>

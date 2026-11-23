@@ -590,8 +590,7 @@ function imprimerTicket(recu) {
     .foot { text-align:center; font-size: 11px; margin-top: 8px; }
   </style></head><body>
     <div class="center">
-      <h1>MENU CONCESSION 5</h1>
-      <div class="muted">JOJ Dakar 2026</div>
+      <h1>FAST &amp; DELICIOUS</h1>
       <div class="muted">Reçu #${recu.id || "—"}</div>
       <div class="muted">${dateStr}${recu.numero ? " · " + recu.numero : ""}</div>
     </div>

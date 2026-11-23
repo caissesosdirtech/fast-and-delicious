@@ -40,7 +40,7 @@ String _texteTicket(Map<String, dynamic> commande) {
   buffer.writeln('TOTAL : ${commande['total']} FCFA');
   buffer.writeln();
   buffer.writeln('Merci et bon appétit !');
-  buffer.writeln('JOJ Dakar 2026');
+  buffer.writeln('Fast & Delicious');
   return buffer.toString();
 }
 

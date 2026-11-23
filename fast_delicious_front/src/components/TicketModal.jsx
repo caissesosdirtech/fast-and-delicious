@@ -72,7 +72,7 @@ export default function TicketModal({ commande, onFermer }) {
 
           <div className="ticket-modal-footer">
             <div className="ticket-modal-merci">Merci de votre visite 🙏</div>
-            <div className="ticket-modal-infos ticket-modal-event">JOJ Dakar 2026</div>
+            <div className="ticket-modal-infos ticket-modal-event">Fast &amp; Delicious</div>
           </div>
         </div>
 

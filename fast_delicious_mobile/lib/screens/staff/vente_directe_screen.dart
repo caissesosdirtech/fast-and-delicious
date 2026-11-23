@@ -1012,8 +1012,7 @@ class _PanierSheetState extends State<_PanierSheet> {
     };
     final d = recu['date'] as DateTime? ?? DateTime.now();
     final b = StringBuffer();
-    b.writeln('MENU CONCESSION 5');
-    b.writeln('JOJ Dakar 2026');
+    b.writeln('FAST & DELICIOUS');
     b.writeln('Reçu${id != null ? " #$id" : ""}');
     b.writeln(DateFormat('dd/MM/yyyy HH:mm').format(d) +
         ((recu['numero'] as String?)?.isNotEmpty == true ? ' · ${recu['numero']}' : ''));

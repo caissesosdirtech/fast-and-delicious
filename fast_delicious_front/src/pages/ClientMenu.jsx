@@ -209,7 +209,8 @@ export default function ClientMenu() {
         <BandeauDefilant texte="🍽️ PAIEMENT ESPÈCES / WAVE / ORANGE MONEY — LIVRAISON DISPONIBLE — RETRAIT SUR PLACE 🍽️" />
 
         <div className="menu-banner-content">
-          <div className="menu-hero-eyebrow">DAKAR 2026 <span aria-hidden="true">»»»»»»</span></div>
+          <img className="menu-banner-logo" src="/logo-fast-delicious-banniere.jpg" alt="Fast & Delicious" width="667" height="500" />
+          <div className="menu-hero-eyebrow">BIENVENUE <span aria-hidden="true">»»»»»»</span></div>
           <h1 className="menu-hero-title font-display">Notre menu</h1>
           <p className="menu-hero-sub">Compose ta commande — <strong>{totalPlats} plats</strong> t'attendent au marché.</p>
 
@@ -292,8 +293,6 @@ export default function ClientMenu() {
           )}
         </div>
 
-        <img className="menu-banner-mascotte menu-banner-mascotte-left" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
-        <img className="menu-banner-mascotte" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
 
         <svg className="menu-banner-vague" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0,32 C 240,64 480,0 720,20 S 1200,64 1440,28 L1440,60 L0,60 Z" fill="var(--cream)" />

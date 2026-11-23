@@ -128,10 +128,9 @@ export default function MenuVitrine() {
   return (
     <div className="menu-vitrine">
       <div className="vitrine-hero">
+        <img className="vitrine-hero-logo" src="/logo-fast-delicious-banniere.jpg" alt="Fast & Delicious" width="667" height="500" />
         <h1 className="font-display">Notre menu complet</h1>
         <p>{totalPlats} plats répartis en {categories.length} rubriques — tout ce que propose notre cuisine.</p>
-        <img className="vitrine-hero-mascotte vitrine-hero-mascotte-left" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
-        <img className="vitrine-hero-mascotte" src="/mascotte-dakar.jpg" alt="" aria-hidden="true" loading="lazy" />
       </div>
 
       {/* Vitrine spéciale "Nos formules" — affiches toutes faites */}

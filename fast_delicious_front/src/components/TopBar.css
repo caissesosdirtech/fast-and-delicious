@@ -5,7 +5,7 @@
   border-bottom:2px solid var(--ink);
 }
 .brand{
-  display:flex; align-items:center;
+  display:flex; align-items:center; gap:10px;
   text-decoration:none;
 }
 .brand-logo{
@@ -70,4 +70,9 @@
 @media (max-width:480px){
   .topbar-call-number{ display:none; }
   .topbar-call-link{ padding:8px 10px; }
+}
+
+/* Petit écran : on garde seulement le logo pour laisser la place aux boutons */
+@media (max-width:520px){
+  .brand-text{ display:none; }
 }
